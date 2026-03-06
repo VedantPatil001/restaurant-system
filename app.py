@@ -1,8 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-import psycopg2
-from psycopg2 import Error
-from psycopg2.extras import RealDictCursor
+# Try psycopg2 first, fall back to pg8000
+try:
+    import psycopg2
+    from psycopg2 import Error
+    from psycopg2.extras import RealDictCursor
+    USING_PSYCOPG2 = True
+except ImportError:
+    import pg8000
+    from pg8000 import DatabaseError as Error
+    # pg8000 doesn't have RealDictCursor exactly, but we can use native connections
+    USING_PSYCOPG2 = False
+    print("Using pg8000 as database adapter")
 import razorpay
 import json
 import hmac
@@ -25,16 +34,25 @@ else:
 # ================= POSTGRESQL CONNECTION =================
 def get_db_connection():
     try:
-        conn = psycopg2.connect(
-            host=os.environ.get('DB_HOST', 'localhost'),
-            database=os.environ.get('DB_NAME', 'restaurant_m_system'),
-            user=os.environ.get('DB_USER', 'postgres'),
-            password=os.environ.get('DB_PASSWORD', 'vedant001'),
-            port=os.environ.get('DB_PORT', '5432')
-        )
+        if USING_PSYCOPG2:
+            conn = psycopg2.connect(
+                host=os.environ.get('DB_HOST'),
+                database=os.environ.get('DB_NAME'),
+                user=os.environ.get('DB_USER'),
+                password=os.environ.get('DB_PASSWORD'),
+                port=os.environ.get('DB_PORT', '5432')
+            )
+        else:
+            conn = pg8000.connect(
+                host=os.environ.get('DB_HOST'),
+                database=os.environ.get('DB_NAME'),
+                user=os.environ.get('DB_USER'),
+                password=os.environ.get('DB_PASSWORD'),
+                port=int(os.environ.get('DB_PORT', '5432'))
+            )
         return conn
     except Error as e:
-        print(f"Error connecting to PostgreSQL: {e}")
+        print(f"Error connecting to database: {e}")
         return None
     
 if os.environ.get('FLASK_ENV') == 'production':
@@ -591,7 +609,7 @@ def delete_category(id):
         cur.execute("DELETE FROM food_cat WHERE fid=%s", (id,))
         conn.commit()
         flash("Category deleted!", "success")
-    except psycopg2.Error as e:
+    except Exception as e:
         conn.rollback()
         flash("Cannot delete category as it is being used by menu items!", "error")
 
@@ -660,7 +678,7 @@ def delete_quantity(id):
         cur.execute("DELETE FROM qty_mast WHERE qid=%s", (id,))
         conn.commit()
         flash("Size deleted!", "success")
-    except psycopg2.Error as e:
+    except Exception as e:
         conn.rollback()
         flash("Cannot delete size as it is being used by menu items!", "error")
 
@@ -783,7 +801,7 @@ def delete_menu(id):
         cur.execute("DELETE FROM menu WHERE mid=%s", (id,))
         conn.commit()
         flash("Menu item deleted!", "success")
-    except psycopg2.Error as e:
+    except Exception as e:
         conn.rollback()
         flash("Cannot delete menu item as it is in orders!", "error")
 
@@ -809,7 +827,12 @@ def signup():
             conn.commit()
             flash("Account created successfully!", "success")
             return redirect('/login')
-        except psycopg2.IntegrityError:
+        except Exception as e:
+            # Check if it's an integrity error
+            if 'unique' in str(e).lower() or 'duplicate' in str(e).lower():
+                flash("Username or email already exists!", "error")
+            else:
+                flash(f"Error creating account: {e}", "error")
             conn.rollback()
             flash("Username or email already exists!", "error")
 
@@ -1060,7 +1083,7 @@ def place_order():
                                      razorpay_order_id=razorpay_order['id'],
                                      razorpay_key_id=RAZORPAY_KEY_ID)
 
-        except psycopg2.Error as e:
+        except Exception as e:
             conn.rollback()
             flash(f"Something went wrong while placing order: {e}")
             print("Error:", e)
