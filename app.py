@@ -32,6 +32,7 @@ else:
     print("WARNING: Razorpay keys not set in environment variables")
 
 # ================= POSTGRESQL CONNECTION =================
+# ================= POSTGRESQL CONNECTION =================
 def get_db_connection():
     try:
         if USING_PSYCOPG2:
@@ -40,7 +41,8 @@ def get_db_connection():
                 database=os.environ.get('DB_NAME'),
                 user=os.environ.get('DB_USER'),
                 password=os.environ.get('DB_PASSWORD'),
-                port=os.environ.get('DB_PORT', '5432')
+                port=os.environ.get('DB_PORT', '5432'),
+                sslmode='require'  # Add SSL for psycopg2
             )
         else:
             conn = pg8000.connect(
@@ -48,10 +50,11 @@ def get_db_connection():
                 database=os.environ.get('DB_NAME'),
                 user=os.environ.get('DB_USER'),
                 password=os.environ.get('DB_PASSWORD'),
-                port=int(os.environ.get('DB_PORT', '5432'))
+                port=int(os.environ.get('DB_PORT', '5432')),
+                ssl_context=True  # Enable SSL for pg8000
             )
         return conn
-    except Error as e:
+    except Exception as e:
         print(f"Error connecting to database: {e}")
         return None
     
