@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2><i class="fas fa-balance-scale"></i> Manage Sizes</h2>
+
+<div class="form-card">
+    <h3>Add New Size</h3>
+    <form method="POST">
+        <label>Size Name</label>
+        <input type="text" name="size" placeholder="Enter size (e.g., Small, Medium, Large)" required>
+        <button type="submit" class="btn-success">
+            <i class="fas fa-plus"></i> Add Size
+        </button>
+    </form>
+</div>
+
+<h3>Size List</h3>
+
+<table>
+    <thead>
+        <tr>
+
+            <th>Size</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for q in quantities %}
+        <tr>
+
+            <td>{{ q[1] }}</td>
+            <td>
+                <a href="/quantity/edit/{{ q[0] }}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="/quantity/delete/{{ q[0] }}" class="btn btn-danger"
+                   onclick="return confirm('Delete this size?')">
+                   <i class="fas fa-trash"></i> Delete
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

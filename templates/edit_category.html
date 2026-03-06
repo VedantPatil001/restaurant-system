@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="form-card">
+    <h2><i class="fas fa-edit"></i> Edit Category</h2>
+    
+    <form method="POST">
+        <label>Category Name</label>
+        <input type="text" name="category" value="{{ category[1] }}" required>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn-success" style="flex: 1;">
+                <i class="fas fa-save"></i> Update
+            </button>
+            <a href="/categories" class="btn-secondary" style="flex: 1; text-align: center; padding: 8px;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+
+<!-- Stats Grid -->
+<div class="dashboard-grid">
+    <!-- Order Stats -->
+    <div class="dashboard-card">
+        <h3><i class="fas fa-shopping-cart"></i> Total Orders</h3>
+        <div class="number">{{ total_orders }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-rupee-sign"></i> Total Revenue</h3>
+        <div class="number">₹{{ total_revenue }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-clock"></i> Pending Orders</h3>
+        <div class="number">{{ pending_orders }}</div>
+    </div>
+    
+    <!-- Menu Stats -->
+    <div class="dashboard-card">
+        <h3><i class="fas fa-utensils"></i> Menu Items</h3>
+        <div class="number">{{ total_menu }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-tags"></i> Categories</h3>
+        <div class="number">{{ total_categories }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-balance-scale"></i> Sizes</h3>
+        <div class="number">{{ total_sizes }}</div>
+    </div>
+    
+    <!-- User Stats -->
+    <div class="dashboard-card">
+        <h3><i class="fas fa-users"></i> Total Users</h3>
+        <div class="number">{{ total_users }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-user"></i> Viewers</h3>
+        <div class="number">{{ total_viewers }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-user-shield"></i> Admins</h3>
+        <div class="number">{{ total_admins }}</div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <h3>Quick Actions</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;">
+        <a href="/admin/orders" class="btn btn-primary" style="text-align: center;">
+            <i class="fas fa-list"></i> Manage Orders
+        </a>
+        <a href="/menu" class="btn btn-primary" style="text-align: center;">
+            <i class="fas fa-utensils"></i> Manage Menu
+        </a>
+        <a href="/categories" class="btn btn-primary" style="text-align: center;">
+            <i class="fas fa-tags"></i> Categories
+        </a>
+        <a href="/quantities" class="btn btn-primary" style="text-align: center;">
+            <i class="fas fa-balance-scale"></i> Sizes
+        </a>
+        <a href="/users" class="btn btn-primary" style="text-align: center;">
+            <i class="fas fa-users"></i> Manage Users
+        </a>
+        <a href="/" class="btn btn-secondary" style="text-align: center;">
+            <i class="fas fa-eye"></i> View Public Menu
+        </a>
+    </div>
+</div>
+
+<!-- Recent Users -->
+{% if recent_users %}
+<div class="card" style="margin-top: 20px;">
+    <h3>Recent Users</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in recent_users %}
+            <tr>
+                <td>{{ user[0] }}</td>
+                <td>{{ user[1] }}</td>
+                <td>{{ user[2] }}</td>
+                <td>
+                    {% if user[3] == 'admin' %}
+                        <span class="status-badge" style="background: #ff6b6b; color: white;">Admin</span>
+                    {% else %}
+                        <span class="status-badge" style="background: #4ecdc4; color: white;">Viewer</span>
+                    {% endif %}
+                </td>
+                <td>{{ user[4] if user[4] else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% endblock %}

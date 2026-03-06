@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="clearfix">
+    <h2 style="float: left;"><i class="fas fa-utensils"></i> Our Delicious Menu</h2>
+    {% if session.user_id and session.role != 'admin' %}
+        <a href="/cart" class="btn btn-primary" style="float: right;">
+            <i class="fas fa-shopping-cart"></i> View Cart
+            {% if session.cart %} ({{ session.cart|length }}){% endif %}
+        </a>
+    {% endif %}
+</div>
+
+<div class="menu-grid">
+    {% for m in menus %}
+        <div class="card">
+            <h3>{{ m[1] }}</h3>
+            <p><strong>Price:</strong> ₹{{ m[2] }}</p>
+            <p><strong>Category:</strong> {{ m[3] }}</p>
+            <p><strong>Size:</strong> {{ m[4] }}</p>
+            
+            <div style="padding: 15px; text-align: center;">
+                {% if session.get('role') == 'viewer' %}
+                    {% set cart = session.get('cart', {}) %}
+                    {% if m[0]|string in cart %}
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <a href="/update_cart/{{ m[0] }}/decrease" class="btn btn-warning" style="padding: 5px 10px;">
+                                <i class="fas fa-minus"></i>
+                            </a>
+                            <span style="font-size: 18px; font-weight: bold; min-width: 30px;">{{ cart[m[0]|string] }}</span>
+                            <a href="/update_cart/{{ m[0] }}/increase" class="btn btn-success" style="padding: 5px 10px;">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                            <a href="/update_cart/{{ m[0] }}/remove" class="btn btn-danger" style="padding: 5px 10px;" 
+                               onclick="return confirm('Remove from cart?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                        <small style="display: block; margin-top: 5px; color: #28a745;">In cart</small>
+                    {% else %}
+                        <a href="/add_to_cart/{{ m[0] }}" class="btn btn-success">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </a>
+                    {% endif %}
+                {% elif session.get('role') == 'admin' %}
+                    <div>
+                        <a href="/menu/edit/{{ m[0] }}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="/menu/delete/{{ m[0] }}" class="btn btn-danger" 
+                           onclick="return confirm('Delete this item?')">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    </div>
+                {% else %}
+                    <a href="/login" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login to Order
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% if not menus %}
+    <div class="card text-center" style="padding: 3rem;">
+        <i class="fas fa-utensils" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+        <h3>No menu items available</h3>
+        {% if session.get('role') == 'admin' %}
+            <a href="/menu/add" class="btn btn-success mt-20">
+                <i class="fas fa-plus"></i> Add Menu Item
+            </a>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% endblock %}

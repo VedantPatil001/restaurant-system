@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="form-card">
+    <h2><i class="fas fa-edit"></i> Edit Menu Item</h2>
+    
+    <form method="POST">
+        <label>Menu Name</label>
+        <input type="text" name="mname" value="{{ menu[1] }}" required>
+
+        <label>Price (₹)</label>
+        <input type="number" name="price" value="{{ menu[2] }}" step="0.01" required>
+
+        <label>Category</label>
+        <select name="fid" required>
+            {% for c in categories %}
+            <option value="{{ c[0] }}" {% if c[0] == menu[3] %}selected{% endif %}>
+                {{ c[1] }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <label>Size</label>
+        <select name="qid" required>
+            {% for q in quantities %}
+            <option value="{{ q[0] }}" {% if q[0] == menu[4] %}selected{% endif %}>
+                {{ q[1] }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn-success" style="flex: 1;">
+                <i class="fas fa-save"></i> Update
+            </button>
+            <a href="/menu" class="btn-secondary" style="flex: 1; text-align: center; padding: 8px;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

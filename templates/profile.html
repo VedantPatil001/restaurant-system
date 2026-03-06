@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2><i class="fas fa-user-circle"></i> My Profile</h2>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <h3><i class="fas fa-user"></i> Username</h3>
+        <div class="number" style="font-size: 24px;">{{ user[1] }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-envelope"></i> Email</h3>
+        <div class="number" style="font-size: 18px;">{{ user[2] }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-tag"></i> Role</h3>
+        <div class="number" style="font-size: 24px; text-transform: capitalize;">{{ user[3] }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-shopping-cart"></i> Orders</h3>
+        <div class="number">{{ order_count }}</div>
+    </div>
+    
+    <div class="dashboard-card">
+        <h3><i class="fas fa-rupee-sign"></i> Total Spent</h3>
+        <div class="number">₹{{ total_spent }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Edit Profile</h3>
+    <form method="POST" action="/update_profile" style="max-width: 500px; margin: 0 auto;">
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label><i class="fas fa-user"></i> Username</label>
+            <input type="text" name="username" value="{{ user[1] }}" class="form-control" required 
+                   style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;">
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label><i class="fas fa-envelope"></i> Email</label>
+            <input type="email" name="email" value="{{ user[2] }}" class="form-control" required
+                   style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Update Profile
+        </button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Account Actions</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="/change_password" class="btn btn-warning">
+            <i class="fas fa-key"></i> Change Password
+        </a>
+        
+        {% if user[3] != 'admin' %}
+        <button onclick="showDeleteModal()" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete My Account
+        </button>
+        {% else %}
+        <p class="status-badge" style="background: #ff6b6b; color: white; padding: 10px;">
+            <i class="fas fa-exclamation-triangle"></i> Admins cannot delete their account
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: white; max-width: 400px; margin: 100px auto; padding: 30px; border-radius: 10px;">
+        <h3 style="color: #dc3545;">Delete Account</h3>
+        <p>Are you sure you want to delete your account? This action cannot be undone and all your orders will be cancelled.</p>
+        
+        <form method="POST" action="/delete_my_account">
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Enter your password to confirm:</label>
+                <input type="password" name="password" class="form-control" required
+                       style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;">
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-danger" style="flex: 1;">
+                    <i class="fas fa-trash"></i> Delete Permanently
+                </button>
+                <button type="button" onclick="hideDeleteModal()" class="btn btn-secondary" style="flex: 1;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'block';
+    }
+    
+    function hideDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        var modal = document.getElementById('deleteModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+
+{% endblock %}

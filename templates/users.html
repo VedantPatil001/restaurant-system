@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2><i class="fas fa-users"></i> User Management</h2>
+
+<div class="card">
+    <h3>All Users</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user[0] }}</td>
+                <td>{{ user[1] }}</td>
+                <td>{{ user[2] }}</td>
+                <td>
+                    {% if user[3] == 'admin' %}
+                        <span class="status-badge" style="background: #ff6b6b; color: white;">Admin</span>
+                    {% else %}
+                        <span class="status-badge" style="background: #4ecdc4; color: white;">Viewer</span>
+                    {% endif %}
+                </td>
+                <td>{{ user[4] if user[4] else 'N/A' }}</td>
+                <td>
+                    {% if user[0] != session.user_id %}
+                        <a href="/user/toggle_role/{{ user[0] }}" class="btn btn-warning" 
+                           onclick="return confirm('Change role for {{ user[1] }}?')">
+                            <i class="fas fa-exchange-alt"></i> Toggle Role
+                        </a>
+                        <a href="/user/delete/{{ user[0] }}" class="btn btn-danger" 
+                           onclick="return confirm('Delete user {{ user[1] }}? This will also delete their orders.')">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    {% else %}
+                        <span class="status-badge" style="background: #6c757d; color: white;">Current User</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if not users %}
+<div class="card text-center" style="padding: 3rem;">
+    <i class="fas fa-users" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+    <h3>No users found</h3>
+</div>
+{% endif %}
+
+{% endblock %}
