@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /logout
+Disallow: /admin/
+Disallow: /users/
+Sitemap: https://restaurant-system-nxmg.onrender.com/sitemap.xml
