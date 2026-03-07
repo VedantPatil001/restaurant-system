@@ -389,7 +389,7 @@ def profile():
     conn = get_db_connection()
     cur = conn.cursor()
     
-    cur.execute("SELECT id, username, email, role FROM users WHERE id=%s", (session['user_id'],))
+    cur.execute("SELECT id, username, email, role, table_number FROM users WHERE id=%s", (session['user_id'],))
     user = cur.fetchone()
     
     cur.execute("SELECT COUNT(*) FROM orders WHERE user_id=%s", (session['user_id'],))
@@ -989,12 +989,12 @@ def admin_orders():
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT o.oid, u.username, o.total_price, o.status, 
-               o.payment_method, o.payment_status, o.payment_id
-        FROM orders o
-        JOIN users u ON u.id = o.user_id
-        ORDER BY o.oid DESC
-    """)
+    SELECT o.oid, u.username, o.total_price, o.status, 
+           o.payment_method, o.payment_status, o.payment_id, o.table_number
+    FROM orders o
+    JOIN users u ON u.id = o.user_id
+    ORDER BY o.oid DESC
+""")
 
     orders = cur.fetchall()
     cur.close()
@@ -1029,6 +1029,11 @@ def place_order():
 
         conn = get_db_connection()
         cur = conn.cursor()
+        
+        # Get user's table number
+        cur.execute("SELECT table_number FROM users WHERE id=%s", (session['user_id'],))
+        user_table = cur.fetchone()
+        table_number = user_table[0] if user_table and user_table[0] else None
 
         try:
             total = 0
@@ -1041,13 +1046,14 @@ def place_order():
 
             order_status = "Pending Payment" if payment_method == "Online" else "Pending"
             
+            # Include table_number in order
             cur.execute(
                 """
-                INSERT INTO orders (user_id, total_price, status, payment_method, payment_status)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO orders (user_id, total_price, status, payment_method, payment_status, table_number)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 RETURNING oid
                 """,
-                (session['user_id'], total, order_status, payment_method, "Pending")
+                (session['user_id'], total, order_status, payment_method, "Pending", table_number)
             )
             
             order_id = cur.fetchone()[0]
@@ -1361,6 +1367,137 @@ def logout():
 @app.route('/health')
 def health():
     return {"status": "healthy"}, 200
+
+# ================= TABLE MANAGEMENT =================
+@app.route('/admin/tables')
+def admin_tables():
+    if session.get('role') != 'admin':
+        flash("Admin access required!", "error")
+        return redirect('/')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Get all users with their table numbers
+    cur.execute("""
+        SELECT id, username, email, role, table_number, created_at
+        FROM users 
+        ORDER BY 
+            CASE WHEN table_number IS NULL THEN 1 ELSE 0 END,
+            table_number,
+            id DESC
+    """)
+    
+    users = cur.fetchall()
+    
+    # Get occupied tables (users with table numbers)
+    cur.execute("""
+        SELECT table_number, COUNT(*) 
+        FROM users 
+        WHERE table_number IS NOT NULL 
+        GROUP BY table_number
+        ORDER BY table_number
+    """)
+    occupied_tables = cur.fetchall()
+    
+    # Get available tables (1-20 that are not assigned)
+    occupied_nums = [str(t[0]) for t in occupied_tables]
+    available_tables = [str(i) for i in range(1, 21) if str(i) not in occupied_nums]
+    
+    cur.close()
+    conn.close()
+    
+    return render_template("admin_tables.html", 
+                         users=users, 
+                         occupied_tables=occupied_tables,
+                         available_tables=available_tables)
+
+@app.route('/admin/assign_table/<int:user_id>', methods=['POST'])
+def assign_table(user_id):
+    if session.get('role') != 'admin':
+        flash("Admin access required!", "error")
+        return redirect('/')
+    
+    table_number = request.form.get('table_number')
+    
+    if not table_number:
+        flash("Please select a table number!", "warning")
+        return redirect('/admin/tables')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Check if table is already assigned
+    cur.execute("SELECT id FROM users WHERE table_number=%s AND id!=%s", 
+                (table_number, user_id))
+    if cur.fetchone():
+        flash(f"Table {table_number} is already assigned to another user!", "error")
+        cur.close()
+        conn.close()
+        return redirect('/admin/tables')
+    
+    # Assign table to user
+    cur.execute("UPDATE users SET table_number=%s WHERE id=%s", 
+                (table_number, user_id))
+    conn.commit()
+    
+    cur.close()
+    conn.close()
+    
+    flash(f"Table {table_number} assigned successfully!", "success")
+    return redirect('/admin/tables')
+
+@app.route('/admin/remove_table/<int:user_id>')
+def remove_table(user_id):
+    if session.get('role') != 'admin':
+        flash("Admin access required!", "error")
+        return redirect('/')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Get table number before removing
+    cur.execute("SELECT table_number FROM users WHERE id=%s", (user_id,))
+    user = cur.fetchone()
+    
+    if user and user[0]:
+        table_num = user[0]
+        cur.execute("UPDATE users SET table_number=NULL WHERE id=%s", (user_id,))
+        conn.commit()
+        flash(f"Table {table_num} removed from user!", "success")
+    
+    cur.close()
+    conn.close()
+    
+    return redirect('/admin/tables')
+
+@app.route('/admin/tables/occupancy')
+def table_occupancy():
+    if session.get('role') != 'admin':
+        flash("Admin access required!", "error")
+        return redirect('/')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Get current table occupancy with user details
+    cur.execute("""
+        SELECT u.table_number, u.username, u.email, 
+               COUNT(o.oid) as order_count,
+               MAX(o.created_at) as last_order
+        FROM users u
+        LEFT JOIN orders o ON o.user_id = u.id AND o.status != 'Cancelled'
+        WHERE u.table_number IS NOT NULL
+        GROUP BY u.table_number, u.username, u.email
+        ORDER BY CAST(u.table_number AS INTEGER)
+    """)
+    
+    occupancy = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+    
+    return render_template("table_occupancy.html", occupancy=occupancy)
 
 
 if __name__ == '__main__':

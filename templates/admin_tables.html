@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<meta name="description" content="Restaurant Table Management - Assign and manage customer tables">
+<meta name="keywords" content="restaurant, table management, dining tables">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<h2><i class="fas fa-chair"></i> Table Management</h2>
+
+<!-- Table Occupancy Summary -->
+<div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+    <div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <h3>Total Tables</h3>
+        <div class="number">20</div>
+    </div>
+    <div class="dashboard-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+        <h3>Occupied</h3>
+        <div class="number">{{ occupied_tables|length }}</div>
+    </div>
+    <div class="dashboard-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+        <h3>Available</h3>
+        <div class="number">{{ available_tables|length }}</div>
+    </div>
+</div>
+
+<!-- Quick Table Status -->
+<div class="card">
+    <h3>Table Status</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; padding: 15px;">
+        {% for i in range(1, 21) %}
+            {% set occupied = false %}
+            {% for table in occupied_tables %}
+                {% if table[0]|int == i %}
+                    {% set occupied = true %}
+                {% endif %}
+            {% endfor %}
+            
+            <div style="text-align: center; padding: 10px; border-radius: 8px; 
+                       {% if occupied %}
+                           background: #dc3545; color: white;
+                       {% else %}
+                           background: #28a745; color: white;
+                       {% endif %}">
+                <div style="font-size: 20px; font-weight: bold;">{{ i }}</div>
+                <small>{% if occupied %}Occupied{% else %}Free{% endif %}</small>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- User Table Assignments -->
+<div class="card">
+    <h3>Customer Table Assignments</h3>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Table #</th>
+                    <th>Customer</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        {% if user[4] %}
+                            <span style="font-size: 18px; font-weight: bold; color: #28a745;">{{ user[4] }}</span>
+                        {% else %}
+                            <span style="color: #999;">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user[1] }}</td>
+                    <td>{{ user[2] }}</td>
+                    <td>
+                        {% if user[3] == 'admin' %}
+                            <span class="status-badge" style="background: #ff6b6b; color: white;">Admin</span>
+                        {% else %}
+                            <span class="status-badge" style="background: #4ecdc4; color: white;">Viewer</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user[3] != 'admin' %}
+                            {% if user[4] %}
+                                <a href="/admin/remove_table/{{ user[0] }}" class="btn btn-danger" 
+                                   onclick="return confirm('Remove table {{ user[4] }} from {{ user[1] }}?')">
+                                    <i class="fas fa-times"></i> Remove Table
+                                </a>
+                            {% else %}
+                                <button onclick="showAssignModal({{ user[0] }}, '{{ user[1] }}')" class="btn btn-success">
+                                    <i class="fas fa-chair"></i> Assign Table
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <span class="status-badge" style="background: #6c757d; color: white;">Admin Account</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Assign Table Modal -->
+<div id="assignModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: white; max-width: 400px; margin: 100px auto; padding: 30px; border-radius: 10px;">
+        <h3 style="margin-bottom: 20px;">Assign Table</h3>
+        <p id="modalUserInfo"></p>
+        
+        <form id="assignForm" method="POST" action="">
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label>Select Table Number:</label>
+                <select name="table_number" id="tableSelect" class="form-control" required style="width: 100%; padding: 10px;">
+                    <option value="">-- Select Table --</option>
+                    {% for table in available_tables %}
+                    <option value="{{ table }}">Table {{ table }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-success" style="flex: 1;">
+                    <i class="fas fa-check"></i> Assign
+                </button>
+                <button type="button" onclick="hideAssignModal()" class="btn btn-secondary" style="flex: 1;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showAssignModal(userId, username) {
+        document.getElementById('assignModal').style.display = 'block';
+        document.getElementById('modalUserInfo').innerHTML = `Assign table to <strong>${username}</strong>`;
+        document.getElementById('assignForm').action = `/admin/assign_table/${userId}`;
+    }
+    
+    function hideAssignModal() {
+        document.getElementById('assignModal').style.display = 'none';
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        var modal = document.getElementById('assignModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+</script>
+
+<style>
+    @media (max-width: 768px) {
+        table {
+            font-size: 14px;
+        }
+        td, th {
+            padding: 8px 5px;
+        }
+        .btn {
+            padding: 5px 8px;
+            font-size: 11px;
+        }
+    }
+</style>
+
+{% endblock %}

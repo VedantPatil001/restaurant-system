@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<meta name="description" content="Real-time table occupancy and order tracking">
+<meta name="keywords" content="restaurant, table occupancy, live tracking">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<h2><i class="fas fa-chart-pie"></i> Table Occupancy</h2>
+
+<div class="dashboard-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+    {% for table in range(1, 21) %}
+        {% set occupied = false %}
+        {% set table_data = null %}
+        {% for occ in occupancy %}
+            {% if occ[0]|int == table %}
+                {% set occupied = true %}
+                {% set table_data = occ %}
+            {% endif %}
+        {% endfor %}
+        
+        <div class="card" style="padding: 15px; {% if occupied %}border-left: 5px solid #dc3545;{% else %}border-left: 5px solid #28a745;{% endif %}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 1.5rem;">Table {{ table }}</h3>
+                {% if occupied %}
+                    <span class="status-badge" style="background: #dc3545; color: white;">Occupied</span>
+                {% else %}
+                    <span class="status-badge" style="background: #28a745; color: white;">Free</span>
+                {% endif %}
+            </div>
+            
+            {% if occupied %}
+                <p><i class="fas fa-user"></i> <strong>{{ table_data[1] }}</strong></p>
+                <p><i class="fas fa-shopping-cart"></i> Orders: {{ table_data[3] or 0 }}</p>
+                {% if table_data[4] %}
+                    <p><small>Last order: {{ table_data[4].strftime('%Y-%m-%d %H:%M') if table_data[4] else 'N/A' }}</small></p>
+                {% endif %}
+            {% else %}
+                <p style="color: #666; font-style: italic;">Available for seating</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<style>
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr !important;
+        }
+        .card {
+            margin-bottom: 10px;
+        }
+    }
+</style>
+
+{% endblock %}

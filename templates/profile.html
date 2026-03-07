@@ -28,6 +28,16 @@
         <h3><i class="fas fa-rupee-sign"></i> Total Spent</h3>
         <div class="number">₹{{ total_spent }}</div>
     </div>
+    <div class="dashboard-card">
+    <h3><i class="fas fa-chair"></i> Table Number</h3>
+    <div class="number" style="font-size: 24px;">
+        {% if user[4] %}
+            {{ user[4] }}
+        {% else %}
+            Not Assigned
+        {% endif %}
+    </div>
+</div>
 </div>
 
 <div class="card">

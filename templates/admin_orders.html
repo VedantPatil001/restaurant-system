@@ -8,6 +8,7 @@
         <tr>
             <th>Order ID</th>
             <th>Customer</th>
+            <th>Table #</th>
             <th>Total Price</th>
             <th>Payment Method</th>
             <th>Payment Status</th>
@@ -20,6 +21,13 @@
         <tr>
             <td>#{{ order[0] }}</td>
             <td>{{ order[1] }}</td>
+            <td>
+    {% if order[7] %}  <!-- Assuming table_number is at index 7 -->
+        <span style="font-size: 16px; font-weight: bold; color: #28a745;">{{ order[7] }}</span>
+    {% else %}
+        <span style="color: #999;">-</span>
+    {% endif %}
+</td>
             <td>₹{{ order[2] }}</td>
             <td>
                 {% if order[4] == 'Cash' %}
