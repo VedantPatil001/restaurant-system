@@ -11,6 +11,44 @@
     {% endif %}
 </div>
 
+<!-- Search Bar for Users -->
+<div class="search-container">
+    <form class="search-form" method="GET" action="/">
+        <input type="text" name="search" class="search-input" 
+               placeholder="Search menu items or categories..." 
+               value="{{ search_query }}">
+        
+        <select name="category" class="search-select">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+            <option value="{{ category[0] }}" {% if category_filter == category[0] %}selected{% endif %}>
+                {{ category[0] }}
+            </option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit" class="search-button">
+            <i class="fas fa-search"></i> Search
+        </button>
+        
+        {% if search_query or category_filter %}
+        <a href="/" class="clear-button">
+            <i class="fas fa-times"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Results count -->
+{% if search_query or category_filter %}
+<div class="results-count">
+    <i class="fas fa-info-circle"></i> Found {{ menus|length }} item(s)
+    {% if search_query %} matching "{{ search_query }}"{% endif %}
+    {% if category_filter %} in category "{{ category_filter }}"{% endif %}
+</div>
+{% endif %}
+
+<!-- Menu Grid -->
 <div class="menu-grid">
     {% for m in menus %}
         <div class="card">
@@ -63,13 +101,19 @@
 </div>
 
 {% if not menus %}
-    <div class="card text-center" style="padding: 3rem;">
-        <i class="fas fa-utensils" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
-        <h3>No menu items available</h3>
+    <div class="empty-state">
+        <i class="fas fa-utensils"></i>
+        <h3>No menu items found</h3>
+        <p>{% if search_query %}Try different search terms or clear filters{% else %}Check back later for new items{% endif %}</p>
         {% if session.get('role') == 'admin' %}
             <a href="/menu/add" class="btn btn-success mt-20">
                 <i class="fas fa-plus"></i> Add Menu Item
             </a>
+        {% endif %}
+        {% if search_query or category_filter %}
+        <a href="/" class="btn btn-primary mt-20" style="margin-left: 10px;">
+            <i class="fas fa-times"></i> Clear Filters
+        </a>
         {% endif %}
     </div>
 {% endif %}

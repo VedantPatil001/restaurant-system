@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2><i class="fas fa-search"></i> Search Users</h2>
+
+<!-- Search Bar -->
+<div class="search-container">
+    <form class="search-form" method="GET" action="/admin/users/search">
+        <input type="text" name="q" class="search-input" 
+               placeholder="Search by username or email..." 
+               value="{{ search_query }}">
+        
+        <select name="role" class="search-select">
+            <option value="">All Roles</option>
+            {% for role_value, role_name in roles %}
+            <option value="{{ role_value }}" {% if role_filter == role_value %}selected{% endif %}>
+                {{ role_name }}
+            </option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit" class="search-button">
+            <i class="fas fa-search"></i> Search
+        </button>
+        
+        {% if search_query or role_filter %}
+        <a href="/admin/users/search" class="clear-button">
+            <i class="fas fa-times"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Results count -->
+{% if search_query or role_filter %}
+<div class="results-count">
+    <i class="fas fa-info-circle"></i> Found {{ users|length }} user(s)
+</div>
+{% endif %}
+
+<!-- Results Table -->
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>#{{ user[0] }}</td>
+            <td><strong>{{ user[1] }}</strong></td>
+            <td>{{ user[2] }}</td>
+            <td>
+                {% if user[3] == 'admin' %}
+                    <span class="badge" style="background: #ff6b6b;">Admin</span>
+                {% else %}
+                    <span class="badge" style="background: #4ecdc4;">Viewer</span>
+                {% endif %}
+            </td>
+            <td>{{ user[4] }}</td>
+            <td>
+                {% if user[0] != session.user_id %}
+                    <a href="/user/toggle_role/{{ user[0] }}" class="btn btn-warning btn-sm" 
+                       onclick="return confirm('Change role for {{ user[1] }}?')">
+                        <i class="fas fa-exchange-alt"></i>
+                    </a>
+                    <a href="/user/delete/{{ user[0] }}" class="btn btn-danger btn-sm" 
+                       onclick="return confirm('Delete user {{ user[1] }}?')">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                {% else %}
+                    <span class="badge" style="background: #6c757d;">Current User</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if not users and search_query %}
+<div class="empty-state">
+    <i class="fas fa-users"></i>
+    <h3>No users found</h3>
+    <p>No users match your search "{{ search_query }}"</p>
+    <a href="/admin/users/search" class="btn btn-primary">
+        <i class="fas fa-times"></i> Clear Search
+    </a>
+</div>
+{% endif %}
+
+<style>
+    .badge {
+        padding: 3px 8px;
+        border-radius: 20px;
+        color: white;
+        font-size: 11px;
+    }
+    .btn-sm {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+</style>
+
+{% endblock %}

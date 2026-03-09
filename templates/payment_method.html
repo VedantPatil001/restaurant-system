@@ -1,47 +1,249 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2><i class="fas fa-credit-card"></i> Select Payment Method</h2>
-
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
-    <!-- Cash on Delivery Card -->
-    <div class="card" style="text-align: center; padding: 30px;">
-        <i class="fas fa-money-bill-wave" style="font-size: 4rem; color: #28a745; margin-bottom: 20px;"></i>
-        <h3>Cash</h3>
-        <p style="color: #666; margin: 15px 0;">Pay when you receive your order</p>
-        <form method="POST" action="/place_order">
-            <input type="hidden" name="payment_method" value="Cash">
-            <button type="submit" class="btn btn-success" style="width: 100%; padding: 12px;">
-                <i class="fas fa-money-bill-wave"></i> Select Cash
+<div class="payment-method-container">
+    <h2><i class="fas fa-credit-card"></i> Select Payment Method</h2>
+    
+    <div class="method-grid">
+        <!-- Cash on Delivery Card -->
+        <div class="method-card" onclick="submitForm('Cash')">
+            <div class="method-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <h3>Cash on Delivery</h3>
+            <p class="method-description">Pay when you receive your order</p>
+            <div class="method-features">
+                <span><i class="fas fa-check"></i> No online payment needed</span>
+                <span><i class="fas fa-check"></i> Pay with exact change</span>
+                <span><i class="fas fa-check"></i> Safe & secure</span>
+            </div>
+            <button class="btn btn-success select-btn">
+                <i class="fas fa-money-bill-wave"></i> Select COD
             </button>
-        </form>
-    </div>
+        </div>
 
-    <!-- Online Payment Card -->
-    <div class="card" style="text-align: center; padding: 30px;">
-        <i class="fas fa-credit-card" style="font-size: 4rem; color: #007bff; margin-bottom: 20px;"></i>
-        <h3>Online Payment</h3>
-        <p style="color: #666; margin: 15px 0;">Pay securely with card, UPI, or netbanking</p>
-        <form method="POST" action="/place_order">
-            <input type="hidden" name="payment_method" value="Online">
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+        <!-- Online Payment Card -->
+        <div class="method-card featured" onclick="submitForm('Online')">
+            <div class="featured-badge">Recommended</div>
+            <div class="method-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <h3>Online Payment</h3>
+            <p class="method-description">Pay securely with card, UPI, or netbanking</p>
+            <div class="method-features">
+                <span><i class="fas fa-check"></i> Multiple payment options</span>
+                <span><i class="fas fa-check"></i> Instant confirmation</span>
+                <span><i class="fas fa-check"></i> 256-bit secure</span>
+            </div>
+            <div class="payment-icons">
+                <i class="fab fa-cc-visa"></i>
+                <i class="fab fa-cc-mastercard"></i>
+                <i class="fab fa-cc-amex"></i>
+                <i class="fab fa-google-pay"></i>
+                <i class="fab fa-phonepe"></i>
+            </div>
+            <button class="btn btn-primary select-btn">
                 <i class="fas fa-credit-card"></i> Pay Online
             </button>
-        </form>
+        </div>
+    </div>
+
+    <!-- Hidden Form for Submission -->
+    <form id="paymentForm" method="POST" action="/place_order" style="display: none;">
+        <input type="hidden" name="payment_method" id="selectedMethod">
+    </form>
+
+    <!-- Back to Cart -->
+    <div class="back-to-cart">
+        <a href="/cart" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Cart
+        </a>
     </div>
 </div>
 
-<div style="text-align: center; margin-top: 20px;">
-    <a href="/cart" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Cart
-    </a>
-</div>
+<script>
+    function submitForm(method) {
+        document.getElementById('selectedMethod').value = method;
+        document.getElementById('paymentForm').submit();
+    }
+</script>
 
 <style>
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    .payment-method-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .payment-method-container h2 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #333;
+    }
+    
+    .payment-method-container h2 i {
+        color: #667eea;
+        margin-right: 10px;
+    }
+    
+    .method-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .method-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px 30px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
+        position: relative;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+    
+    .method-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    
+    .method-card.featured {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    }
+    
+    .featured-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 20px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    .method-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .method-card:hover .method-icon {
+        transform: scale(1.1);
+    }
+    
+    .method-icon i {
+        font-size: 48px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .method-card h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 24px;
+    }
+    
+    .method-description {
+        color: #666;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    
+    .method-features {
+        text-align: left;
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+    
+    .method-features span {
+        display: block;
+        margin: 8px 0;
+        color: #666;
+        font-size: 13px;
+    }
+    
+    .method-features span i {
+        color: #28a745;
+        margin-right: 8px;
+        font-size: 12px;
+    }
+    
+    .payment-icons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+        color: #666;
+    }
+    
+    .payment-icons i {
+        font-size: 28px;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-icons i:hover {
+        transform: translateY(-3px);
+        color: #667eea;
+    }
+    
+    .select-btn {
+        width: 100%;
+        padding: 15px !important;
+        font-size: 16px !important;
+        margin-top: 20px;
+    }
+    
+    .back-to-cart {
+        text-align: center;
+    }
+    
+    .back-to-cart .btn {
+        padding: 12px 30px;
+    }
+    
+    @media (max-width: 768px) {
+        .method-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .method-card {
+            padding: 30px 20px;
+        }
+        
+        .method-icon {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .method-icon i {
+            font-size: 36px;
+        }
+        
+        .method-card h3 {
+            font-size: 20px;
+        }
+        
+        .payment-icons {
+            flex-wrap: wrap;
+        }
     }
 </style>
 

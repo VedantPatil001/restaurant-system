@@ -1,67 +1,590 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2><i class="fas fa-receipt"></i> Order Details</h2>
+<div class="order-details-container">
+    <!-- Back Button -->
+    <a href="javascript:history.back()" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
 
-{% if order %}
-<div class="card" style="margin-bottom: 20px; padding: 20px;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-        <div>
-            <h4 style="color: #666; margin-bottom: 5px;">Order ID</h4>
-            <p style="font-size: 18px; font-weight: bold;">#{{ order[0] }}</p>
+    {% if order %}
+    <!-- Order Header Card -->
+    <div class="order-header-card">
+        <div class="order-title">
+            <h2><i class="fas fa-receipt"></i> Order Details</h2>
+            <span class="order-id">#{{ order[0] }}</span>
         </div>
-        <div>
-            <h4 style="color: #666; margin-bottom: 5px;">Order Date</h4>
-            <p><i class="fas fa-calendar-alt" style="color: #667eea;"></i> {{ order[6] }}</p>
+        
+        <div class="order-timeline">
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-label">Order Date</span>
+                    <span class="timeline-value">{{ order[6] }}</span>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-label">Last Updated</span>
+                    <span class="timeline-value">{{ order[7] }}</span>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-icon">
+                    <i class="fas fa-chair"></i>
+                </div>
+                <div class="timeline-content">
+                    <span class="timeline-label">Table Number</span>
+                    <span class="timeline-value">
+                        {% if order[5] %}
+                            <span class="table-badge">Table {{ order[5] }}</span>
+                        {% else %}
+                            <span class="text-muted">Not assigned</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
         </div>
-        <div>
-            <h4 style="color: #666; margin-bottom: 5px;">Last Updated</h4>
-            <p><i class="fas fa-clock" style="color: #667eea;"></i> {{ order[7] }}</p>
-        </div>
-        <div>
-            <h4 style="color: #666; margin-bottom: 5px;">Table Number</h4>
-            <p>{% if order[5] %}<span style="font-weight: bold; color: #28a745;">Table {{ order[5] }}</span>{% else %}Not assigned{% endif %}</p>
+        
+        <div class="order-status-bar">
+            <div class="status-item {% if order[2] in ['Pending Payment', 'Pending'] %}active{% endif %}">
+                <div class="status-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="status-label">Pending</div>
+            </div>
+            <div class="status-line {% if order[2] in ['Approved', 'Completed'] %}active{% endif %}"></div>
+            <div class="status-item {% if order[2] == 'Approved' %}active{% endif %}">
+                <div class="status-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="status-label">Approved</div>
+            </div>
+            <div class="status-line {% if order[2] == 'Completed' %}active{% endif %}"></div>
+            <div class="status-item {% if order[2] == 'Completed' %}active{% endif %}">
+                <div class="status-icon">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div class="status-label">Completed</div>
+            </div>
         </div>
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-<div class="card">
-    <table>
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
+    <!-- Order Items Card -->
+    <div class="items-card">
+        <h3><i class="fas fa-list"></i> Order Items</h3>
+        
+        <div class="items-table">
+            <div class="items-header">
+                <div class="col-item">Item</div>
+                <div class="col-qty">Qty</div>
+                <div class="col-price">Price</div>
+                <div class="col-subtotal">Subtotal</div>
+            </div>
+            
             {% set total = namespace(value=0) %}
             {% for item in items %}
             {% set subtotal = item[1] * item[2] %}
             {% set total.value = total.value + subtotal %}
-            <tr>
-                <td>{{ item[0] }}</td>
-                <td>{{ item[1] }}</td>
-                <td>₹{{ item[2] }}</td>
-                <td>₹{{ subtotal }}</td>
-            </tr>
+            <div class="item-row">
+                <div class="col-item">
+                    <div class="item-name">{{ item[0] }}</div>
+                </div>
+                <div class="col-qty">
+                    <span class="qty-badge">{{ item[1] }}</span>
+                </div>
+                <div class="col-price">₹{{ item[2] }}</div>
+                <div class="col-subtotal">₹{{ subtotal }}</div>
+            </div>
             {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <th colspan="3" style="text-align: right;">Total:</th>
-                <th>₹{{ total.value }}</th>
-            </tr>
-        </tfoot>
-    </table>
-    
-    <div class="text-center mt-20">
-        <a href="javascript:history.back()" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Go Back
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <div class="summary-row">
+                <span>Subtotal:</span>
+                <span>₹{{ total.value }}</span>
+            </div>
+            <div class="summary-row">
+                <span>Tax:</span>
+                <span>₹0</span>
+            </div>
+            <div class="summary-row">
+                <span>Delivery Fee:</span>
+                <span class="free">FREE</span>
+            </div>
+            <div class="summary-row grand-total">
+                <span>Total Amount:</span>
+                <span class="total-amount">₹{{ total.value }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Info Card -->
+    {% if order %}
+    <div class="payment-info-card">
+        <h3><i class="fas fa-credit-card"></i> Payment Information</h3>
+        
+        <div class="payment-grid">
+            <div class="payment-item">
+                <span class="payment-label">Payment Method</span>
+                <span class="payment-value">
+                    {% if order[3] == 'Cash' %}
+                        <i class="fas fa-money-bill-wave" style="color: #28a745;"></i> Cash on Delivery
+                    {% else %}
+                        <i class="fas fa-credit-card" style="color: #007bff;"></i> Online Payment
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="payment-item">
+                <span class="payment-label">Payment Status</span>
+                <span class="payment-value">
+                    {% if order[4] == 'Completed' %}
+                        <span class="status-badge status-completed">
+                            <i class="fas fa-check-circle"></i> Paid
+                        </span>
+                    {% elif order[4] == 'Failed' %}
+                        <span class="status-badge status-rejected">
+                            <i class="fas fa-times-circle"></i> Failed
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-pending">
+                            <i class="fas fa-clock"></i> Pending
+                        </span>
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="payment-item">
+                <span class="payment-label">Order Status</span>
+                <span class="payment-value">
+                    {% if order[2] == 'Pending Payment' %}
+                        <span class="status-badge status-pending-payment">
+                            <i class="fas fa-clock"></i> Awaiting Payment
+                        </span>
+                    {% elif order[2] == 'Pending' %}
+                        <span class="status-badge status-pending">
+                            <i class="fas fa-hourglass-half"></i> Pending Approval
+                        </span>
+                    {% elif order[2] == 'Approved' %}
+                        <span class="status-badge status-approved">
+                            <i class="fas fa-check"></i> Approved
+                        </span>
+                    {% elif order[2] == 'Completed' %}
+                        <span class="status-badge status-completed">
+                            <i class="fas fa-check-double"></i> Completed
+                        </span>
+                    {% elif order[2] == 'Rejected' %}
+                        <span class="status-badge status-rejected">
+                            <i class="fas fa-times"></i> Rejected
+                        </span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="/my_orders" class="btn btn-primary">
+            <i class="fas fa-list"></i> Back to Orders
         </a>
+        <a href="/invoice/{{ order[0] }}" class="btn btn-success">
+            <i class="fas fa-file-invoice"></i> Download Invoice
+        </a>
+        {% if order and order[2] == 'Pending' and session.get('role') == 'viewer' %}
+        <a href="/cancel_order/{{ order[0] }}" class="btn btn-danger" 
+           onclick="return confirm('Cancel this order?')">
+            <i class="fas fa-ban"></i> Cancel Order
+        </a>
+        {% endif %}
     </div>
 </div>
+
+<style>
+    .order-details-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #666;
+        text-decoration: none;
+        margin-bottom: 20px;
+        transition: color 0.3s ease;
+    }
+    
+    .back-button:hover {
+        color: #667eea;
+    }
+    
+    .order-header-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .order-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .order-title h2 {
+        margin: 0;
+        color: #333;
+    }
+    
+    .order-title h2 i {
+        color: #667eea;
+        margin-right: 10px;
+    }
+    
+    .order-id {
+        font-size: 20px;
+        font-weight: bold;
+        color: #667eea;
+        background: #f0f3ff;
+        padding: 8px 15px;
+        border-radius: 30px;
+    }
+    
+    .order-timeline {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+    
+    .timeline-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .timeline-icon i {
+        color: white;
+        font-size: 18px;
+    }
+    
+    .timeline-content {
+        flex: 1;
+    }
+    
+    .timeline-label {
+        display: block;
+        font-size: 11px;
+        color: #666;
+        margin-bottom: 2px;
+    }
+    
+    .timeline-value {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .table-badge {
+        background: #28a745;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+    
+    .text-muted {
+        color: #999;
+    }
+    
+    .order-status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px 0;
+    }
+    
+    .status-item {
+        text-align: center;
+        opacity: 0.5;
+        transition: all 0.3s ease;
+    }
+    
+    .status-item.active {
+        opacity: 1;
+    }
+    
+    .status-icon {
+        width: 50px;
+        height: 50px;
+        background: #e0e0e0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+    
+    .status-item.active .status-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .status-item.active .status-icon i {
+        color: white;
+    }
+    
+    .status-icon i {
+        color: #999;
+        font-size: 20px;
+    }
+    
+    .status-label {
+        font-size: 12px;
+        color: #666;
+    }
+    
+    .status-item.active .status-label {
+        color: #667eea;
+        font-weight: 600;
+    }
+    
+    .status-line {
+        flex: 1;
+        height: 2px;
+        background: #e0e0e0;
+        margin: 0 10px;
+    }
+    
+    .status-line.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .items-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .items-card h3 {
+        margin: 0 0 20px 0;
+        color: #333;
+    }
+    
+    .items-card h3 i {
+        color: #667eea;
+        margin-right: 10px;
+    }
+    
+    .items-table {
+        margin-bottom: 20px;
+    }
+    
+    .items-header {
+        display: grid;
+        grid-template-columns: 3fr 1fr 1fr 1fr;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 10px;
+    }
+    
+    .item-row {
+        display: grid;
+        grid-template-columns: 3fr 1fr 1fr 1fr;
+        padding: 12px;
+        border-bottom: 1px solid #f0f0f0;
+        align-items: center;
+    }
+    
+    .item-row:hover {
+        background: #f8f9fa;
+    }
+    
+    .item-name {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .qty-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .order-summary {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        color: #666;
+    }
+    
+    .summary-row .free {
+        color: #28a745;
+        font-weight: 600;
+    }
+    
+    .summary-row.grand-total {
+        border-top: 2px solid #e0e0e0;
+        margin-top: 8px;
+        padding-top: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .total-amount {
+        color: #28a745;
+    }
+    
+    .payment-info-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .payment-info-card h3 {
+        margin: 0 0 20px 0;
+        color: #333;
+    }
+    
+    .payment-info-card h3 i {
+        color: #667eea;
+        margin-right: 10px;
+    }
+    
+    .payment-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .payment-item {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+    
+    .payment-label {
+        display: block;
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .payment-value {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 13px;
+    }
+    
+    .status-pending-payment { background: #cce5ff; color: #004085; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-approved { background: #d4edda; color: #155724; }
+    .status-completed { background: #d1e7dd; color: #0f5132; }
+    .status-rejected { background: #f8d7da; color: #721c24; }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 30px;
+    }
+    
+    .action-buttons .btn {
+        padding: 12px 25px;
+        font-size: 14px;
+    }
+    
+    @media (max-width: 768px) {
+        .order-timeline {
+            grid-template-columns: 1fr;
+        }
+        
+        .items-header,
+        .item-row {
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            font-size: 12px;
+        }
+        
+        .order-status-bar {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .status-line {
+            width: 2px;
+            height: 30px;
+            margin: 0;
+        }
+        
+        .payment-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+        }
+    }
+</style>
 
 {% endblock %}

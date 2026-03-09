@@ -1,117 +1,600 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2><i class="fas fa-user-circle"></i> My Profile</h2>
+<div class="profile-container">
+    <h2><i class="fas fa-user-circle"></i> My Profile</h2>
 
-<div class="dashboard-grid">
-    <div class="dashboard-card">
-        <h3><i class="fas fa-user"></i> Username</h3>
-        <div class="number" style="font-size: 24px;">{{ user[1] }}</div>
-    </div>
-    
-    <div class="dashboard-card">
-        <h3><i class="fas fa-envelope"></i> Email</h3>
-        <div class="number" style="font-size: 18px;">{{ user[2] }}</div>
-    </div>
-    
-    <div class="dashboard-card">
-        <h3><i class="fas fa-tag"></i> Role</h3>
-        <div class="number" style="font-size: 24px; text-transform: capitalize;">{{ user[3] }}</div>
-    </div>
-    
-    <div class="dashboard-card">
-        <h3><i class="fas fa-shopping-cart"></i> Orders</h3>
-        <div class="number">{{ order_count }}</div>
-    </div>
-    
-    <div class="dashboard-card">
-        <h3><i class="fas fa-rupee-sign"></i> Total Spent</h3>
-        <div class="number">₹{{ total_spent }}</div>
-    </div>
-    <div class="dashboard-card">
-    <h3><i class="fas fa-chair"></i> Table Number</h3>
-    <div class="number" style="font-size: 24px;">
-        {% if user[4] %}
-            {{ user[4] }}
-        {% else %}
-            Not Assigned
-        {% endif %}
-    </div>
-</div>
-</div>
-
-<div class="card">
-    <h3>Edit Profile</h3>
-    <form method="POST" action="/update_profile" style="max-width: 500px; margin: 0 auto;">
-        <div class="form-group" style="margin-bottom: 15px;">
-            <label><i class="fas fa-user"></i> Username</label>
-            <input type="text" name="username" value="{{ user[1] }}" class="form-control" required 
-                   style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;">
+    <!-- Profile Stats Grid -->
+    <div class="profile-stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Username</span>
+                <span class="stat-value">{{ user[1] }}</span>
+            </div>
         </div>
         
-        <div class="form-group" style="margin-bottom: 15px;">
-            <label><i class="fas fa-envelope"></i> Email</label>
-            <input type="email" name="email" value="{{ user[2] }}" class="form-control" required
-                   style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Email</span>
+                <span class="stat-value">{{ user[2] }}</span>
+            </div>
         </div>
         
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> Update Profile
-        </button>
-    </form>
-</div>
-
-<div class="card">
-    <h3>Account Actions</h3>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="/change_password" class="btn btn-warning">
-            <i class="fas fa-key"></i> Change Password
-        </a>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tag"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Role</span>
+                <span class="stat-value">
+                    {% if user[3] == 'admin' %}
+                        <span class="role-badge admin">Admin</span>
+                    {% else %}
+                        <span class="role-badge viewer">Viewer</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
         
-        {% if user[3] != 'admin' %}
-        <button onclick="showDeleteModal()" class="btn btn-danger">
-            <i class="fas fa-trash"></i> Delete My Account
-        </button>
-        {% else %}
-        <p class="status-badge" style="background: #ff6b6b; color: white; padding: 10px;">
-            <i class="fas fa-exclamation-triangle"></i> Admins cannot delete their account
-        </p>
-        {% endif %}
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chair"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Table Number</span>
+                <span class="stat-value">
+                    {% if user[4] %}
+                        <span class="table-badge">Table {{ user[4] }}</span>
+                    {% else %}
+                        <span class="text-muted">Not Assigned</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Total Orders</span>
+                <span class="stat-value">{{ order_count }}</span>
+            </div>
+        </div>
+        
+        <div class="stat-card highlight">
+            <div class="stat-icon">
+                <i class="fas fa-rupee-sign"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-label">Total Spent</span>
+                <span class="stat-value">₹{{ total_spent }}</span>
+            </div>
+        </div>
     </div>
+
+    <!-- Edit Profile Form -->
+    <div class="profile-card">
+        <h3><i class="fas fa-edit"></i> Edit Profile</h3>
+        
+        <form method="POST" action="/update_profile" class="profile-form">
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-user"></i> Username
+                </label>
+                <input type="text" id="username" name="username" value="{{ user[1] }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope"></i> Email
+                </label>
+                <input type="email" id="email" name="email" value="{{ user[2] }}" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-save"></i> Update Profile
+            </button>
+        </form>
+    </div>
+
+    <!-- Account Actions -->
+    <div class="profile-card">
+        <h3><i class="fas fa-cog"></i> Account Settings</h3>
+        
+        <div class="action-buttons">
+            <a href="/change_password" class="action-btn">
+                <i class="fas fa-key"></i>
+                <div class="btn-content">
+                    <strong>Change Password</strong>
+                    <small>Update your password regularly</small>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            
+            {% if user[3] != 'admin' %}
+            <button onclick="showDeleteModal()" class="action-btn danger">
+                <i class="fas fa-trash"></i>
+                <div class="btn-content">
+                    <strong>Delete My Account</strong>
+                    <small>Permanently remove your account</small>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            {% else %}
+            <div class="admin-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Admin accounts cannot be deleted through the profile.</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    {% if order_count > 0 %}
+    <div class="profile-card">
+        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+        
+        <div class="recent-orders">
+            <a href="/my_orders" class="view-all-link">
+                View All Orders <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Delete Account Modal -->
-<div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div style="background: white; max-width: 400px; margin: 100px auto; padding: 30px; border-radius: 10px;">
-        <h3 style="color: #dc3545;">Delete Account</h3>
-        <p>Are you sure you want to delete your account? This action cannot be undone and all your orders will be cancelled.</p>
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Delete Account</h3>
+        </div>
         
-        <form method="POST" action="/delete_my_account">
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label>Enter your password to confirm:</label>
-                <input type="password" name="password" class="form-control" required
-                       style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;">
-            </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete your account? This action cannot be undone and:</p>
+            <ul>
+                <li><i class="fas fa-times"></i> All your orders will be cancelled</li>
+                <li><i class="fas fa-times"></i> Your profile information will be permanently removed</li>
+                <li><i class="fas fa-times"></i> You won't be able to recover your account</li>
+            </ul>
             
-            <div style="display: flex; gap: 10px;">
-                <button type="submit" class="btn btn-danger" style="flex: 1;">
-                    <i class="fas fa-trash"></i> Delete Permanently
-                </button>
-                <button type="button" onclick="hideDeleteModal()" class="btn btn-secondary" style="flex: 1;">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </div>
-        </form>
+            <form method="POST" action="/delete_my_account" class="delete-form">
+                <div class="form-group">
+                    <label for="password">Enter your password to confirm:</label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="Enter your password">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete Permanently
+                    </button>
+                    <button type="button" onclick="hideDeleteModal()" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+<style>
+    .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .profile-container h2 {
+        margin-bottom: 30px;
+        color: #333;
+    }
+    
+    .profile-container h2 i {
+        color: #667eea;
+        margin-right: 10px;
+    }
+    
+    .profile-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    
+    .stat-card.highlight {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .stat-card.highlight .stat-icon {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .stat-card.highlight .stat-icon i {
+        color: white;
+    }
+    
+    .stat-card.highlight .stat-label,
+    .stat-card.highlight .stat-value {
+        color: white;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: #f0f3ff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .stat-icon i {
+        font-size: 24px;
+        color: #667eea;
+    }
+    
+    .stat-details {
+        flex: 1;
+    }
+    
+    .stat-label {
+        display: block;
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 2px;
+    }
+    
+    .stat-value {
+        display: block;
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .role-badge {
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+        color: white;
+    }
+    
+    .role-badge.admin {
+        background: #ff6b6b;
+    }
+    
+    .role-badge.viewer {
+        background: #4ecdc4;
+    }
+    
+    .table-badge {
+        background: #28a745;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+    
+    .text-muted {
+        color: #999;
+    }
+    
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .profile-card h3 {
+        margin: 0 0 20px 0;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .profile-card h3 i {
+        color: #667eea;
+    }
+    
+    .profile-form {
+        max-width: 500px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .form-group label i {
+        color: #667eea;
+        margin-right: 5px;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    
+    .btn-block {
+        width: 100%;
+        padding: 12px !important;
+        font-size: 16px !important;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+        background: #f8f9fa;
+        border: none;
+        border-radius: 12px;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .action-btn:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    
+    .action-btn.danger:hover {
+        background: #f8d7da;
+    }
+    
+    .action-btn i:first-child {
+        font-size: 24px;
+        color: #667eea;
+    }
+    
+    .action-btn.danger i:first-child {
+        color: #dc3545;
+    }
+    
+    .btn-content {
+        flex: 1;
+        text-align: left;
+    }
+    
+    .btn-content strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #333;
+    }
+    
+    .btn-content small {
+        color: #666;
+        font-size: 12px;
+    }
+    
+    .action-btn i:last-child {
+        color: #999;
+    }
+    
+    .admin-warning {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+        background: #f8d7da;
+        color: #721c24;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+    
+    .admin-warning i {
+        font-size: 20px;
+    }
+    
+    .recent-orders {
+        text-align: right;
+    }
+    
+    .view-all-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: gap 0.3s ease;
+    }
+    
+    .view-all-link:hover {
+        gap: 12px;
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .modal-content {
+        background: white;
+        max-width: 500px;
+        margin: 50px auto;
+        border-radius: 20px;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 25px;
+        text-align: center;
+    }
+    
+    .modal-header i {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    
+    .modal-header h3 {
+        color: white;
+        margin: 0;
+    }
+    
+    .modal-body {
+        padding: 25px;
+    }
+    
+    .modal-body p {
+        color: #666;
+        margin-bottom: 15px;
+    }
+    
+    .modal-body ul {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    
+    .modal-body li {
+        margin: 10px 0;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .modal-body li i {
+        color: #dc3545;
+    }
+    
+    .delete-form .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .delete-form label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .delete-form input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+    }
+    
+    .delete-form input:focus {
+        outline: none;
+        border-color: #dc3545;
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .modal-actions .btn {
+        flex: 1;
+        padding: 12px;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .modal-content {
+            margin: 20px;
+        }
+        
+        .modal-actions {
+            flex-direction: column;
+        }
+    }
+</style>
 
 <script>
     function showDeleteModal() {
         document.getElementById('deleteModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
     }
     
     function hideDeleteModal() {
         document.getElementById('deleteModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
     }
     
     // Close modal when clicking outside
@@ -119,6 +602,7 @@
         var modal = document.getElementById('deleteModal');
         if (event.target == modal) {
             modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
     }
 </script>

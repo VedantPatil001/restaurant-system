@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2><i class="fas fa-search"></i> Search Orders</h2>
+
+<!-- Advanced Search Bar -->
+<div class="card" style="padding: 25px; margin-bottom: 30px;">
+    <form method="GET" action="/admin/orders/search">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Search</label>
+                <input type="text" name="q" placeholder="Customer, Order ID, Table..." 
+                       value="{{ search_query }}" class="form-control">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Status</label>
+                <select name="status" class="form-control">
+                    <option value="">All Statuses</option>
+                    {% for status in statuses %}
+                    <option value="{{ status[0] }}" {% if status_filter == status[0] %}selected{% endif %}>
+                        {{ status[0] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">From Date</label>
+                <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">To Date</label>
+                <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary" style="flex: 2;">
+                <i class="fas fa-search"></i> Search Orders
+            </button>
+            <a href="/admin/orders/search" class="btn btn-secondary" style="flex: 1;">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Results count -->
+{% if search_query or status_filter or date_from or date_to %}
+<div class="results-count">
+    <i class="fas fa-info-circle"></i> Found {{ orders|length }} order(s)
+</div>
+{% endif %}
+
+<!-- Results Table -->
+<div style="overflow-x: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Table</th>
+                <th>Total</th>
+                <th>Order Date</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order[0] }}</td>
+                <td><strong>{{ order[1] }}</strong></td>
+                <td>
+                    {% if order[7] %}
+                        <span class="badge" style="background: #28a745;">Table {{ order[7] }}</span>
+                    {% else %}
+                        <span style="color: #999;">-</span>
+                    {% endif %}
+                </td>
+                <td><strong>₹{{ order[2] }}</strong></td>
+                <td>{{ order[8] }}</td>
+                <td>
+                    {{ order[4] }}<br>
+                    <small>
+                        {% if order[5] == 'Completed' %}
+                            <span class="status-badge status-completed">Paid</span>
+                        {% elif order[5] == 'Failed' %}
+                            <span class="status-badge status-rejected">Failed</span>
+                        {% else %}
+                            <span class="status-badge status-pending">Pending</span>
+                        {% endif %}
+                    </small>
+                </td>
+                <td>
+                    {% if order[3] == 'Pending Payment' %}
+                        <span class="status-badge status-pending-payment">Awaiting Payment</span>
+                    {% elif order[3] == 'Pending' %}
+                        <span class="status-badge status-pending">Pending</span>
+                    {% elif order[3] == 'Approved' %}
+                        <span class="status-badge status-approved">Approved</span>
+                    {% elif order[3] == 'Completed' %}
+                        <span class="status-badge status-completed">Completed</span>
+                    {% elif order[3] == 'Rejected' %}
+                        <span class="status-badge status-rejected">Rejected</span>
+                    {% elif order[3] == 'Cancelled' %}
+                        <span class="status-badge status-cancelled">Cancelled</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/order_details/{{ order[0] }}" class="btn btn-info btn-sm" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="/invoice/{{ order[0] }}" class="btn btn-secondary btn-sm" title="Download Invoice">
+                        <i class="fas fa-file-invoice"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if not orders and (search_query or status_filter or date_from or date_to) %}
+<div class="empty-state">
+    <i class="fas fa-search"></i>
+    <h3>No orders found</h3>
+    <p>Try adjusting your search criteria</p>
+    <a href="/admin/orders/search" class="btn btn-primary">
+        <i class="fas fa-times"></i> Clear Filters
+    </a>
+</div>
+{% endif %}
+
+<style>
+    .badge {
+        padding: 3px 8px;
+        border-radius: 20px;
+        color: white;
+        font-size: 11px;
+    }
+    .btn-sm {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+</style>
+
+{% endblock %}

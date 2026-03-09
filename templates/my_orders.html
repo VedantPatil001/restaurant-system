@@ -4,133 +4,289 @@
 <h2><i class="fas fa-clipboard-list"></i> My Orders</h2>
 
 {% if orders %}
-<div style="overflow-x: auto;">
-    <table>
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Date & Time</th>
-                <th>Total</th>
-                <th>Payment</th>
-                <th>Status</th>
-                <th>Last Updated</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
-            <tr>
-                <td>#{{ order[0] }}</td>
-                <td>
-                    <span style="font-size: 13px;">
-                        <i class="fas fa-calendar-alt" style="color: #667eea;"></i> {{ order[6] }}
-                    </span>
-                </td>
-                <td><strong>₹{{ order[1] }}</strong></td>
-                <td>
-                    {% if order[3] == 'Cash' %}
-                        <span style="color: #28a745;">
-                            <i class="fas fa-money-bill-wave"></i> Cash
-                        </span>
-                    {% else %}
-                        <span style="color: #007bff;">
-                            <i class="fas fa-credit-card"></i> Online
-                        </span>
-                    {% endif %}
-                    <br>
-                    <small>
-                        {% if order[4] == 'Completed' %}
-                            <span class="status-badge status-completed">Paid</span>
-                        {% elif order[4] == 'Failed' %}
-                            <span class="status-badge status-rejected">Failed</span>
-                        {% else %}
-                            <span class="status-badge status-pending">Pending</span>
-                        {% endif %}
-                    </small>
-                </td>
-                <td>
-                    {% if order[2] == 'Pending Payment' %}
-                        <span class="status-badge status-pending-payment">Awaiting Payment</span>
-                    {% elif order[2] == 'Pending' %}
-                        <span class="status-badge status-pending">Pending Approval</span>
-                    {% elif order[2] == 'Approved' %}
-                        <span class="status-badge status-approved">Approved</span>
-                    {% elif order[2] == 'Completed' %}
-                        <span class="status-badge status-completed">Completed</span>
-                    {% elif order[2] == 'Rejected' %}
-                        <span class="status-badge status-rejected">Rejected</span>
-                    {% elif order[2] == 'Cancelled' %}
-                        <span class="status-badge status-cancelled">Cancelled</span>
-                    {% elif order[2] == 'Payment Failed' %}
-                        <span class="status-badge status-rejected">Payment Failed</span>
-                        {% if order[5] %}
-                            <small style="display: block; color: #dc3545; font-size: 11px;">
-                                {{ order[5] }}
-                            </small>
-                        {% endif %}
-                    {% else %}
-                        {{ order[2] }}
-                    {% endif %}
-                </td>
-                <td>
-                    <span style="font-size: 12px; color: #666;">
-                        <i class="fas fa-clock"></i> {{ order[7] }}
-                    </span>
-                </td>
-                <td>
-                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                        <a href="/order_details/{{ order[0] }}" class="btn btn-info" title="View Details">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        
-                        <a href="/invoice/{{ order[0] }}" class="btn btn-secondary" title="Download Invoice">
-                            <i class="fas fa-file-invoice"></i>
-                        </a>
-                        
-                        {% if order[2] == 'Pending Payment' and order[3] == 'Online' %}
-                            <a href="/retry_payment/{{ order[0] }}" class="btn btn-success" title="Pay Now">
-                                <i class="fas fa-credit-card"></i> Pay
-                            </a>
-                        {% endif %}
-                        
-                        {% if order[2] == 'Pending' %}
-                            <a href="/cancel_order/{{ order[0] }}" class="btn btn-danger" 
-                               onclick="return confirm('Cancel this order?')" title="Cancel Order">
-                                <i class="fas fa-ban"></i>
-                            </a>
-                        {% endif %}
-                        
-                        {% if order[2] == 'Payment Failed' and order[3] == 'Online' %}
-                            <a href="/retry_payment/{{ order[0] }}" class="btn btn-warning" title="Retry Payment">
-                                <i class="fas fa-redo"></i>
-                            </a>
-                        {% endif %}
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- Order Statistics -->
+<div class="order-stats">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-shopping-bag"></i>
+        </div>
+        <div class="stat-details">
+            <span class="stat-value">{{ orders|length }}</span>
+            <span class="stat-label">Total Orders</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-details">
+            <span class="stat-value">{{ orders|selectattr('2', 'equalto', 'Pending')|list|length }}</span>
+            <span class="stat-label">Pending</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-details">
+            <span class="stat-value">{{ orders|selectattr('2', 'equalto', 'Completed')|list|length }}</span>
+            <span class="stat-label">Completed</span>
+        </div>
+    </div>
 </div>
+
+<!-- Orders List -->
+<div class="orders-list">
+    {% for order in orders %}
+    <div class="order-card">
+        <div class="order-header">
+            <div class="order-id">
+                <span class="label">Order #</span>
+                <span class="value">{{ order[0] }}</span>
+            </div>
+            <div class="order-status">
+                {% if order[2] == 'Pending Payment' %}
+                    <span class="status-badge status-pending-payment">
+                        <i class="fas fa-clock"></i> Awaiting Payment
+                    </span>
+                {% elif order[2] == 'Pending' %}
+                    <span class="status-badge status-pending">
+                        <i class="fas fa-hourglass-half"></i> Pending Approval
+                    </span>
+                {% elif order[2] == 'Approved' %}
+                    <span class="status-badge status-approved">
+                        <i class="fas fa-check"></i> Approved
+                    </span>
+                {% elif order[2] == 'Completed' %}
+                    <span class="status-badge status-completed">
+                        <i class="fas fa-check-double"></i> Completed
+                    </span>
+                {% elif order[2] == 'Rejected' %}
+                    <span class="status-badge status-rejected">
+                        <i class="fas fa-times"></i> Rejected
+                    </span>
+                {% elif order[2] == 'Cancelled' %}
+                    <span class="status-badge status-cancelled">
+                        <i class="fas fa-ban"></i> Cancelled
+                    </span>
+                {% elif order[2] == 'Payment Failed' %}
+                    <span class="status-badge status-rejected">
+                        <i class="fas fa-exclamation-triangle"></i> Payment Failed
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="order-body">
+            <div class="order-info-grid">
+                <div class="info-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div>
+                        <span class="info-label">Order Date</span>
+                        <span class="info-value">{{ order[6] }}</span>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <span class="info-label">Last Updated</span>
+                        <span class="info-value">{{ order[7] }}</span>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <i class="fas fa-credit-card"></i>
+                    <div>
+                        <span class="info-label">Payment</span>
+                        <span class="info-value">
+                            {{ order[3] }}
+                            {% if order[4] == 'Completed' %}
+                                <span class="payment-status paid">(Paid)</span>
+                            {% elif order[4] == 'Failed' %}
+                                <span class="payment-status failed">(Failed)</span>
+                            {% else %}
+                                <span class="payment-status pending">(Pending)</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="info-item highlight">
+                    <i class="fas fa-rupee-sign"></i>
+                    <div>
+                        <span class="info-label">Total Amount</span>
+                        <span class="info-value total">₹{{ order[1] }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if order[5] and order[2] == 'Payment Failed' %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ order[5] }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="order-footer">
+            <a href="/order_details/{{ order[0] }}" class="btn btn-info">
+                <i class="fas fa-eye"></i> View Details
+            </a>
+            <a href="/invoice/{{ order[0] }}" class="btn btn-secondary">
+                <i class="fas fa-file-invoice"></i> Invoice
+            </a>
+            
+            {% if order[2] == 'Pending Payment' and order[3] == 'Online' %}
+                <a href="/retry_payment/{{ order[0] }}" class="btn btn-success">
+                    <i class="fas fa-credit-card"></i> Pay Now
+                </a>
+            {% endif %}
+            
+            {% if order[2] == 'Pending' %}
+                <a href="/cancel_order/{{ order[0] }}" class="btn btn-danger" 
+                   onclick="return confirm('Cancel this order?')">
+                    <i class="fas fa-ban"></i> Cancel Order
+                </a>
+            {% endif %}
+            
+            {% if order[2] == 'Payment Failed' and order[3] == 'Online' %}
+                <a href="/retry_payment/{{ order[0] }}" class="btn btn-warning">
+                    <i class="fas fa-redo"></i> Retry Payment
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
 {% else %}
-<div class="card text-center" style="padding: 3rem;">
-    <i class="fas fa-box-open" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
-    <h3>You haven't placed any orders yet</h3>
-    <a href="/" class="btn btn-primary mt-20">
+<div class="empty-state">
+    <div class="empty-icon">
+        <i class="fas fa-box-open"></i>
+    </div>
+    <h3>No Orders Yet</h3>
+    <p>Looks like you haven't placed any orders. Browse our delicious menu and place your first order!</p>
+    <a href="/" class="btn btn-primary btn-large">
         <i class="fas fa-utensils"></i> Browse Menu
     </a>
 </div>
 {% endif %}
 
 <style>
-    .status-badge {
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 600;
-        display: inline-block;
-        white-space: nowrap;
+    .order-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
     }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .stat-icon i {
+        font-size: 24px;
+        color: white;
+    }
+    
+    .stat-details {
+        flex: 1;
+    }
+    
+    .stat-value {
+        display: block;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        line-height: 1.2;
+    }
+    
+    .stat-label {
+        display: block;
+        color: #666;
+        font-size: 13px;
+    }
+    
+    .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 30px;
+    }
+    
+    .order-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+    }
+    
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border-color: #667eea;
+    }
+    
+    .order-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .order-id .label {
+        color: #666;
+        font-size: 14px;
+        margin-right: 5px;
+    }
+    
+    .order-id .value {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .status-badge i {
+        font-size: 12px;
+    }
+    
     .status-pending-payment { background: #cce5ff; color: #004085; }
     .status-pending { background: #fff3cd; color: #856404; }
     .status-approved { background: #d4edda; color: #155724; }
@@ -138,57 +294,143 @@
     .status-rejected { background: #f8d7da; color: #721c24; }
     .status-cancelled { background: #e2e3e5; color: #383d41; }
     
-    .btn {
-        padding: 5px 8px;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
+    .order-body {
+        padding: 20px;
+    }
+    
+    .order-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .info-item {
+        display: flex;
         align-items: center;
-        gap: 3px;
-        font-size: 11px;
-    }
-    .btn-info { background: #17a2b8; color: white; }
-    .btn-secondary { background: #6c757d; color: white; }
-    .btn-success { background: #28a745; color: white; }
-    .btn-danger { background: #dc3545; color: white; }
-    .btn-warning { background: #ffc107; color: #212529; }
-    
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-        font-size: 13px;
+        gap: 12px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 10px;
     }
     
-    th {
+    .info-item i {
+        font-size: 20px;
+        color: #667eea;
+        width: 24px;
+    }
+    
+    .info-item.highlight {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .info-item.highlight i,
+    .info-item.highlight .info-label,
+    .info-item.highlight .info-value {
         color: white;
-        padding: 12px 8px;
-        text-align: left;
-        white-space: nowrap;
     }
     
-    td {
-        padding: 10px 8px;
-        border-bottom: 1px solid #ddd;
+    .info-label {
+        display: block;
+        font-size: 11px;
+        color: #666;
+        margin-bottom: 2px;
     }
     
-    tr:hover {
-        background: #f5f5f5;
+    .info-value {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .info-value.total {
+        font-size: 18px;
+    }
+    
+    .payment-status {
+        font-size: 11px;
+        margin-left: 5px;
+    }
+    
+    .payment-status.paid { color: #28a745; }
+    .payment-status.failed { color: #dc3545; }
+    .payment-status.pending { color: #ffc107; }
+    
+    .error-message {
+        margin-top: 15px;
+        padding: 10px;
+        background: #f8d7da;
+        color: #721c24;
+        border-radius: 8px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .order-footer {
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-large {
+        padding: 15px 30px !important;
+        font-size: 16px !important;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        margin: 30px 0;
+    }
+    
+    .empty-icon i {
+        font-size: 80px;
+        color: #ccc;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h3 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        color: #666;
+        margin-bottom: 20px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
     }
     
     @media (max-width: 768px) {
-        table {
-            font-size: 12px;
+        .order-stats {
+            grid-template-columns: 1fr;
         }
-        td, th {
-            padding: 8px 5px;
+        
+        .order-header {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
         }
-        .btn {
-            padding: 4px 6px;
-            font-size: 10px;
+        
+        .order-info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .order-footer {
+            flex-direction: column;
+        }
+        
+        .order-footer .btn {
+            width: 100%;
         }
     }
 </style>

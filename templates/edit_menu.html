@@ -1,43 +1,169 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="form-card">
-    <h2><i class="fas fa-edit"></i> Edit Menu Item</h2>
-    
-    <form method="POST">
-        <label>Menu Name</label>
-        <input type="text" name="mname" value="{{ menu[1] }}" required>
-
-        <label>Price (₹)</label>
-        <input type="number" name="price" value="{{ menu[2] }}" step="0.01" required>
-
-        <label>Category</label>
-        <select name="fid" required>
-            {% for c in categories %}
-            <option value="{{ c[0] }}" {% if c[0] == menu[3] %}selected{% endif %}>
-                {{ c[1] }}
-            </option>
-            {% endfor %}
-        </select>
-
-        <label>Size</label>
-        <select name="qid" required>
-            {% for q in quantities %}
-            <option value="{{ q[0] }}" {% if q[0] == menu[4] %}selected{% endif %}>
-                {{ q[1] }}
-            </option>
-            {% endfor %}
-        </select>
-
-        <div style="display: flex; gap: 10px;">
-            <button type="submit" class="btn-success" style="flex: 1;">
-                <i class="fas fa-save"></i> Update
-            </button>
-            <a href="/menu" class="btn-secondary" style="flex: 1; text-align: center; padding: 8px;">
-                <i class="fas fa-times"></i> Cancel
-            </a>
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <i class="fas fa-edit"></i>
+            <h2>Edit Menu Item</h2>
+            <p>Update menu item details</p>
         </div>
-    </form>
+        
+        <form method="POST" class="edit-form">
+            <div class="form-group">
+                <label for="mname">
+                    <i class="fas fa-utensils"></i> Menu Name
+                </label>
+                <input type="text" id="mname" name="mname" value="{{ menu[1] }}" 
+                       placeholder="Enter item name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="price">
+                    <i class="fas fa-rupee-sign"></i> Price (₹)
+                </label>
+                <input type="number" id="price" name="price" value="{{ menu[2] }}" 
+                       step="0.01" placeholder="Enter price" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="fid">
+                    <i class="fas fa-tags"></i> Category
+                </label>
+                <select id="fid" name="fid" required>
+                    {% for c in categories %}
+                    <option value="{{ c[0] }}" {% if c[0] == menu[3] %}selected{% endif %}>
+                        {{ c[1] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="qid">
+                    <i class="fas fa-balance-scale"></i> Size
+                </label>
+                <select id="qid" name="qid" required>
+                    {% for q in quantities %}
+                    <option value="{{ q[0] }}" {% if q[0] == menu[4] %}selected{% endif %}>
+                        {{ q[1] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Update Menu
+                </button>
+                <a href="/menu" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
+
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .form-header i {
+        font-size: 48px;
+        color: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 15px;
+    }
+    
+    .form-header h2 {
+        margin: 0 0 5px 0;
+        color: #333;
+    }
+    
+    .form-header p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .edit-form {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .form-group label i {
+        color: #667eea;
+        margin-right: 5px;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .form-actions .btn {
+        flex: 1;
+        padding: 12px;
+        font-size: 16px;
+        text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+        .form-card {
+            padding: 25px;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
 
 {% endblock %}

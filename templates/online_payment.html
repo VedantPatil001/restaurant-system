@@ -1,129 +1,179 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2><i class="fas fa-credit-card"></i> Complete Your Payment</h2>
-
-<div class="card" style="max-width: 500px; margin: 30px auto; padding: 30px;">
-    <div style="text-align: center; margin-bottom: 30px;">
-        <i class="fas fa-lock" style="font-size: 3rem; color: #28a745;"></i>
-        <h3>Secure Payment</h3>
-        <p style="color: #666;">Order #{{ order_id }}</p>
-    </div>
-
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span>Subtotal:</span>
-            <span><strong>₹{{ total }}</strong></span>
+<div class="payment-container">
+    <div class="payment-card">
+        <div class="payment-header">
+            <div class="security-badge">
+                <i class="fas fa-lock"></i>
+                <span>Secure Payment</span>
+            </div>
+            <h2>Complete Your Payment</h2>
+            <p class="order-ref">Order #{{ order_id }}</p>
         </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span>Taxes & Fees:</span>
-            <span><strong>₹0</strong></span>
+        
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div class="summary-details">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span>₹{{ total }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Taxes & Fees:</span>
+                    <span>₹0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery:</span>
+                    <span class="free">FREE</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total Amount:</span>
+                    <span class="amount">₹{{ total }}</span>
+                </div>
+            </div>
         </div>
-        <hr>
-        <div style="display: flex; justify-content: space-between; font-size: 1.2rem;">
-            <span>Total Amount:</span>
-            <span><strong style="color: #28a745;">₹{{ total }}</strong></span>
+        
+        <!-- Payment Methods -->
+        <div class="payment-methods">
+            <h3>Select Payment Method</h3>
+            <div class="method-grid">
+                <div class="method-card" onclick="selectMethod('card')">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Credit/Debit Card</span>
+                </div>
+                <div class="method-card" onclick="selectMethod('upi')">
+                    <i class="fas fa-qrcode"></i>
+                    <span>UPI</span>
+                </div>
+                <div class="method-card" onclick="selectMethod('netbanking')">
+                    <i class="fas fa-university"></i>
+                    <span>NetBanking</span>
+                </div>
+            </div>
         </div>
-    </div>
-    
-    <!-- UPI ID Input with better validation [citation:7] -->
-    <div class="form-group" style="margin-bottom: 20px;">
-        <label for="upi_id"><i class="fas fa-qrcode"></i> Your UPI ID</label>
-        <input type="text" id="upi_id" name="upi_id" class="form-control" 
-               placeholder="e.g., username@okhdfcbank" 
-               pattern="[a-zA-Z0-9._-]+@[a-zA-Z0-9]+"
-               title="Enter valid UPI ID (e.g., username@bankhandle)"
-               required>
-        <small style="color: #666;">Enter your UPI ID to continue payment</small>
-        <div id="upi_error" style="color: #dc3545; font-size: 12px; margin-top: 5px; display: none;"></div>
-    </div>
-
-    <!-- Payment method selection -->
-    <div class="form-group" style="margin-bottom: 20px;">
-        <label><i class="fas fa-credit-card"></i> Payment Method</label>
-        <select id="payment_method" class="form-control">
-            <option value="default">Select Payment Method</option>
-            <option value="card">Credit/Debit Card</option>
-            <option value="upi">UPI</option>
-            <option value="netbanking">NetBanking</option>
-        </select>
-    </div>
-
-    <!-- Razorpay Button -->
-    <button id="rzp-button" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem;">
-        <i class="fas fa-credit-card"></i> Pay Now ₹{{ total }}
-    </button>
-
-    <div style="margin-top: 20px; text-align: center;">
-        <i class="fas fa-shield-alt" style="color: #28a745;"></i>
-        <small style="color: #666;">Secured by Razorpay. Your payment info is encrypted.</small>
-    </div>
-
-    <div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px;">
-        <img src="https://razorpay.com/assets/razorpay-logo.svg" style="height: 30px;" alt="Razorpay">
-        <span style="color: #666;">|</span>
-        <span><i class="fab fa-cc-visa" style="font-size: 24px; color: #1a1f71;"></i></span>
-        <span><i class="fab fa-cc-mastercard" style="font-size: 24px; color: #f79e1b;"></i></span>
-        <span><i class="fab fa-cc-amex" style="font-size: 24px; color: #0070ba;"></i></span>
-        <span><i class="fab fa-google-pay" style="font-size: 24px; color: #4285f4;"></i></span>
-        <span><i class="fab fa-phonepe" style="font-size: 24px; color: #5f259f;"></i></span>
-    </div>
-
-    <div style="margin-top: 20px; text-align: center;">
-        <a href="/my_orders" class="btn btn-secondary" style="padding: 8px 20px;">
-            <i class="fas fa-times"></i> Cancel Payment
-        </a>
+        
+        <!-- UPI Input (shown when UPI selected) -->
+        <div id="upiSection" class="payment-section" style="display: none;">
+            <div class="form-group">
+                <label for="upi_id">
+                    <i class="fas fa-qrcode"></i> UPI ID
+                </label>
+                <input type="text" id="upi_id" class="form-control" 
+                       placeholder="e.g., username@okhdfcbank"
+                       pattern="[a-zA-Z0-9._-]+@[a-zA-Z0-9]+">
+                <div id="upi_error" class="error-message"></div>
+                <small>Enter your UPI ID (e.g., name@bank)</small>
+            </div>
+        </div>
+        
+        <!-- Card Input (shown when Card selected) -->
+        <div id="cardSection" class="payment-section" style="display: none;">
+            <div class="form-group">
+                <label for="card_number">Card Number</label>
+                <input type="text" id="card_number" class="form-control" 
+                       placeholder="1234 5678 9012 3456">
+            </div>
+            <div class="card-row">
+                <div class="form-group">
+                    <label for="expiry">Expiry</label>
+                    <input type="text" id="expiry" class="form-control" placeholder="MM/YY">
+                </div>
+                <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="password" id="cvv" class="form-control" placeholder="123">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pay Button -->
+        <button id="pay-button" class="pay-button">
+            <i class="fas fa-lock"></i>
+            Pay ₹{{ total }}
+        </button>
+        
+        <div class="payment-footer">
+            <div class="trust-badges">
+                <span><i class="fas fa-shield-alt"></i> 256-bit SSL</span>
+                <span><i class="fas fa-lock"></i> Secure</span>
+                <span><i class="fas fa-credit-card"></i> PCI Compliant</span>
+            </div>
+            
+            <div class="payment-partners">
+                <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay">
+                <span>|</span>
+                <i class="fab fa-cc-visa"></i>
+                <i class="fab fa-cc-mastercard"></i>
+                <i class="fab fa-cc-amex"></i>
+                <i class="fab fa-google-pay"></i>
+                <i class="fab fa-phonepe"></i>
+            </div>
+            
+            <a href="/my_orders" class="cancel-link">
+                <i class="fas fa-times"></i> Cancel and return to orders
+            </a>
+        </div>
     </div>
 </div>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+    let selectedMethod = '';
+    
+    function selectMethod(method) {
+        selectedMethod = method;
+        
+        // Hide all sections
+        document.querySelectorAll('.payment-section').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
+        
+        // Show selected section
+        event.currentTarget.classList.add('active');
+        
+        if (method === 'upi') {
+            document.getElementById('upiSection').style.display = 'block';
+        } else if (method === 'card') {
+            document.getElementById('cardSection').style.display = 'block';
+        }
+    }
+    
     function validateUPIId(upiId) {
-        if (!upiId) {
-            document.getElementById('upi_error').style.display = 'block';
+        if (!upiId && selectedMethod === 'upi') {
             document.getElementById('upi_error').innerHTML = 'UPI ID is required';
+            document.getElementById('upi_error').style.display = 'block';
             return false;
         }
         
-        // UPI ID format: username@bankhandle [citation:7]
-        const upiRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/;
-        if (!upiRegex.test(upiId)) {
-            document.getElementById('upi_error').style.display = 'block';
-            document.getElementById('upi_error').innerHTML = 'Invalid UPI ID format. Use format: username@bankhandle';
-            return false;
-        }
-        
-        // Check if UPI ID contains valid bank handles
-        const validHandles = ['okhdfcbank', 'oksbi', 'okicici', 'okaxis', 'okpunjab', 
-                            'okyesbank', 'okcanara', 'okbankofbaroda', 'ybl', 'paytm', 
-                            'axl', 'ibl', 'pingpay', 'amazonpay', 'phonepe', 'gpay'];
-        
-        const handle = upiId.split('@')[1];
-        if (!validHandles.some(h => handle.includes(h))) {
-            document.getElementById('upi_error').style.display = 'block';
-            document.getElementById('upi_error').innerHTML = 'Invalid UPI bank handle. Please check with your bank.';
-            return false;
+        if (upiId) {
+            const upiRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/;
+            if (!upiRegex.test(upiId)) {
+                document.getElementById('upi_error').innerHTML = 'Invalid UPI ID format';
+                document.getElementById('upi_error').style.display = 'block';
+                return false;
+            }
         }
         
         document.getElementById('upi_error').style.display = 'none';
         return true;
     }
-
-    document.getElementById('rzp-button').onclick = function(e) {
+    
+    document.getElementById('pay-button').onclick = function(e) {
         e.preventDefault();
         
-        // Validate UPI ID
-        const upiId = document.getElementById('upi_id').value;
-        if (!validateUPIId(upiId)) {
-            return;
-        }
-        
-        // Get payment method
-        const paymentMethod = document.getElementById('payment_method').value;
-        if (paymentMethod === 'default') {
+        if (!selectedMethod) {
             alert('Please select a payment method');
             return;
         }
+        
+        if (selectedMethod === 'upi') {
+            const upiId = document.getElementById('upi_id').value;
+            if (!validateUPIId(upiId)) return;
+        }
+        
+        // Show loading state
+        const btn = this;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        btn.disabled = true;
         
         // Prepare Razorpay options
         var options = {
@@ -135,106 +185,342 @@
             "image": "https://via.placeholder.com/150",
             "order_id": "{{ razorpay_order_id }}",
             "handler": function(response) {
-                // Show loading indicator
-                document.getElementById('rzp-button').innerHTML = 'Processing...';
-                document.getElementById('rzp-button').disabled = true;
-                
-                // Send payment success to server
                 fetch('/payment_success', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: new URLSearchParams({
                         'razorpay_payment_id': response.razorpay_payment_id,
                         'razorpay_order_id': response.razorpay_order_id,
                         'razorpay_signature': response.razorpay_signature
                     })
-                })
-                .then(() => {
-                    window.location.href = '/my_orders';
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    window.location.href = '/my_orders';
-                });
+                }).then(() => window.location.href = '/my_orders');
             },
             "modal": {
                 "ondismiss": function() {
-                    // User closed the payment modal without paying
-                    fetch('/payment_failed', {
-                        method: 'GET'
-                    })
-                    .then(() => {
-                        window.location.href = '/my_orders';
-                    });
+                    fetch('/payment_failed', { method: 'GET' })
+                        .then(() => window.location.href = '/my_orders');
                 }
             },
             "prefill": {
                 "name": "{{ session.username }}",
                 "email": "{{ session.get('email', '') }}",
-                "contact": "",
-                "method": paymentMethod,
-                "vpa": upiId // Pass UPI ID for prefill [citation:1]
+                "method": selectedMethod,
+                "vpa": document.getElementById('upi_id')?.value || ''
             },
-            "theme": {
-                "color": "#667eea"
-            }
+            "theme": {"color": "#667eea"}
         };
         
-        // Open Razorpay checkout
         var rzp = new Razorpay(options);
         rzp.open();
-    }
-
-    // Real-time UPI ID validation
-    document.getElementById('upi_id').addEventListener('input', function(e) {
+    };
+    
+    // Real-time UPI validation
+    document.getElementById('upi_id')?.addEventListener('input', function(e) {
         validateUPIId(e.target.value);
     });
 </script>
 
 <style>
-    .card {
+    .payment-container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+    
+    .payment-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .payment-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .security-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #e8f5e9;
+        color: #28a745;
+        padding: 8px 15px;
+        border-radius: 30px;
+        font-size: 13px;
+        margin-bottom: 15px;
+    }
+    
+    .payment-header h2 {
+        margin: 0 0 5px 0;
+        color: #333;
+    }
+    
+    .order-ref {
+        color: #666;
+        font-size: 14px;
+        margin: 0;
+    }
+    
+    .order-summary {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .order-summary h3 {
+        margin: 0 0 15px 0;
+        font-size: 16px;
+        color: #333;
+    }
+    
+    .summary-details {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .summary-row .free {
+        color: #28a745;
+        font-weight: 600;
+    }
+    
+    .summary-row.total {
+        border-top: 2px solid #e0e0e0;
+        margin-top: 10px;
+        padding-top: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .summary-row.total .amount {
+        color: #28a745;
+    }
+    
+    .payment-methods {
+        margin-bottom: 25px;
+    }
+    
+    .payment-methods h3 {
+        margin: 0 0 15px 0;
+        font-size: 16px;
+        color: #333;
+    }
+    
+    .method-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    
+    .method-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 15px 10px;
+        text-align: center;
+        cursor: pointer;
         transition: all 0.3s ease;
     }
-    .card:hover {
+    
+    .method-card:hover {
+        border-color: #667eea;
         transform: translateY(-2px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
     }
+    
+    .method-card.active {
+        border-color: #667eea;
+        background: #f0f3ff;
+    }
+    
+    .method-card i {
+        font-size: 24px;
+        color: #667eea;
+        margin-bottom: 5px;
+        display: block;
+    }
+    
+    .method-card span {
+        font-size: 12px;
+        color: #333;
+    }
+    
+    .payment-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
+    
     .form-group label {
         display: block;
         margin-bottom: 5px;
-        font-weight: 600;
         color: #333;
+        font-weight: 600;
+        font-size: 13px;
     }
+    
+    .form-group label i {
+        color: #667eea;
+        margin-right: 5px;
+    }
+    
     .form-control {
         width: 100%;
-        padding: 10px;
+        padding: 12px;
         border: 2px solid #e0e0e0;
-        border-radius: 5px;
+        border-radius: 8px;
         font-size: 14px;
         transition: all 0.3s ease;
     }
+    
     .form-control:focus {
         outline: none;
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
     }
-    .form-control.error {
-        border-color: #dc3545;
+    
+    .card-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
     }
+    
+    .error-message {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+    }
+    
     small {
         display: block;
+        color: #666;
+        font-size: 11px;
         margin-top: 5px;
+    }
+    
+    .pay-button {
+        width: 100%;
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border: none;
+        padding: 18px;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .pay-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(40,167,69,0.3);
+    }
+    
+    .pay-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+    
+    .payment-footer {
+        text-align: center;
+    }
+    
+    .trust-badges {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 20px;
         color: #666;
         font-size: 12px;
     }
-    .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
+    
+    .trust-badges span i {
+        margin-right: 5px;
+        color: #28a745;
+    }
+    
+    .payment-partners {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        color: #666;
+    }
+    
+    .payment-partners img {
+        height: 25px;
+    }
+    
+    .payment-partners i {
+        font-size: 24px;
+        color: #666;
+    }
+    
+    .cancel-link {
+        color: #666;
+        text-decoration: none;
+        font-size: 13px;
+        transition: color 0.3s ease;
+    }
+    
+    .cancel-link:hover {
+        color: #dc3545;
+    }
+    
+    @media (max-width: 768px) {
+        .payment-card {
+            padding: 20px;
+        }
+        
+        .method-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .card-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .trust-badges {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .payment-partners {
+            flex-wrap: wrap;
+        }
     }
 </style>
 

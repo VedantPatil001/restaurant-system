@@ -10,39 +10,51 @@
 <!-- Table Occupancy Summary -->
 <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
     <div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-        <h3>Total Tables</h3>
+        <h3><i class="fas fa-chair"></i> Total Tables</h3>
         <div class="number">20</div>
     </div>
     <div class="dashboard-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
-        <h3>Occupied</h3>
+        <h3><i class="fas fa-user-check"></i> Occupied</h3>
         <div class="number">{{ occupied_tables|length }}</div>
     </div>
     <div class="dashboard-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
-        <h3>Available</h3>
+        <h3><i class="fas fa-user-plus"></i> Available</h3>
         <div class="number">{{ available_tables|length }}</div>
     </div>
 </div>
 
-<!-- Quick Table Status -->
+<!-- Quick Table Status - Visual Grid -->
 <div class="card">
-    <h3>Table Status</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; padding: 15px;">
+    <h3><i class="fas fa-th"></i> Table Status Overview</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 20px;">
         {% for i in range(1, 21) %}
             {% set occupied = false %}
+            {% set table_user = None %}
             {% for table in occupied_tables %}
                 {% if table[0]|int == i %}
                     {% set occupied = true %}
                 {% endif %}
             {% endfor %}
+            {% for user in users %}
+                {% if user[4]|int == i %}
+                    {% set table_user = user %}
+                {% endif %}
+            {% endfor %}
             
-            <div style="text-align: center; padding: 10px; border-radius: 8px; 
-                       {% if occupied %}
-                           background: #dc3545; color: white;
-                       {% else %}
-                           background: #28a745; color: white;
-                       {% endif %}">
-                <div style="font-size: 20px; font-weight: bold;">{{ i }}</div>
-                <small>{% if occupied %}Occupied{% else %}Free{% endif %}</small>
+            <div class="table-card {% if occupied %}occupied{% else %}free{% endif %}" 
+                 onclick="showTableDetails({{ i }}, '{{ table_user[1] if table_user else '' }}', '{{ table_user[2] if table_user else '' }}')"
+                 style="cursor: pointer;">
+                <div class="table-number">{{ i }}</div>
+                <div class="table-status">
+                    {% if occupied %}
+                        <i class="fas fa-user"></i> Occupied
+                    {% else %}
+                        <i class="fas fa-check"></i> Free
+                    {% endif %}
+                </div>
+                {% if occupied and table_user %}
+                    <small>{{ table_user[1] }}</small>
+                {% endif %}
             </div>
         {% endfor %}
     </div>
@@ -50,7 +62,7 @@
 
 <!-- User Table Assignments -->
 <div class="card">
-    <h3>Customer Table Assignments</h3>
+    <h3><i class="fas fa-users-cog"></i> Customer Table Assignments</h3>
     <div style="overflow-x: auto;">
         <table>
             <thead>
@@ -58,7 +70,7 @@
                     <th>Table #</th>
                     <th>Customer</th>
                     <th>Email</th>
-                    <th>Status</th>
+                    <th>Role</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -67,34 +79,34 @@
                 <tr>
                     <td>
                         {% if user[4] %}
-                            <span style="font-size: 18px; font-weight: bold; color: #28a745;">{{ user[4] }}</span>
+                            <span class="table-badge assigned">Table {{ user[4] }}</span>
                         {% else %}
-                            <span style="color: #999;">Not assigned</span>
+                            <span class="table-badge unassigned">Not assigned</span>
                         {% endif %}
                     </td>
-                    <td>{{ user[1] }}</td>
+                    <td><strong>{{ user[1] }}</strong></td>
                     <td>{{ user[2] }}</td>
                     <td>
                         {% if user[3] == 'admin' %}
-                            <span class="status-badge" style="background: #ff6b6b; color: white;">Admin</span>
+                            <span class="role-badge admin">Admin</span>
                         {% else %}
-                            <span class="status-badge" style="background: #4ecdc4; color: white;">Viewer</span>
+                            <span class="role-badge viewer">Viewer</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if user[3] != 'admin' %}
                             {% if user[4] %}
-                                <a href="/admin/remove_table/{{ user[0] }}" class="btn btn-danger" 
+                                <a href="/admin/remove_table/{{ user[0] }}" class="btn btn-danger btn-sm" 
                                    onclick="return confirm('Remove table {{ user[4] }} from {{ user[1] }}?')">
-                                    <i class="fas fa-times"></i> Remove Table
+                                    <i class="fas fa-times"></i> Remove
                                 </a>
                             {% else %}
-                                <button onclick="showAssignModal({{ user[0] }}, '{{ user[1] }}')" class="btn btn-success">
-                                    <i class="fas fa-chair"></i> Assign Table
+                                <button onclick="showAssignModal({{ user[0] }}, '{{ user[1] }}')" class="btn btn-success btn-sm">
+                                    <i class="fas fa-chair"></i> Assign
                                 </button>
                             {% endif %}
                         {% else %}
-                            <span class="status-badge" style="background: #6c757d; color: white;">Admin Account</span>
+                            <span class="badge" style="background: #6c757d;">Admin Account</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -104,16 +116,26 @@
     </div>
 </div>
 
+<!-- Table Details Modal -->
+<div id="tableModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideTableModal()">&times;</span>
+        <h3 id="modalTitle">Table Details</h3>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
 <!-- Assign Table Modal -->
-<div id="assignModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div style="background: white; max-width: 400px; margin: 100px auto; padding: 30px; border-radius: 10px;">
-        <h3 style="margin-bottom: 20px;">Assign Table</h3>
+<div id="assignModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="hideAssignModal()">&times;</span>
+        <h3>Assign Table</h3>
         <p id="modalUserInfo"></p>
         
         <form id="assignForm" method="POST" action="">
             <div class="form-group" style="margin-bottom: 20px;">
                 <label>Select Table Number:</label>
-                <select name="table_number" id="tableSelect" class="form-control" required style="width: 100%; padding: 10px;">
+                <select name="table_number" id="tableSelect" class="form-control" required>
                     <option value="">-- Select Table --</option>
                     {% for table in available_tables %}
                     <option value="{{ table }}">Table {{ table }}</option>
@@ -133,6 +155,150 @@
     </div>
 </div>
 
+<style>
+    /* Table Card Styles */
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        padding: 15px 10px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .table-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    
+    .table-card.occupied {
+        border-color: #dc3545;
+        background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+    }
+    
+    .table-card.free {
+        border-color: #28a745;
+        background: linear-gradient(135deg, #f0fff4 0%, #fff 100%);
+    }
+    
+    .table-number {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .table-status {
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+    
+    .table-badge {
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .table-badge.assigned {
+        background: #28a745;
+        color: white;
+    }
+    
+    .table-badge.unassigned {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .role-badge {
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .role-badge.admin {
+        background: #ff6b6b;
+        color: white;
+    }
+    
+    .role-badge.viewer {
+        background: #4ecdc4;
+        color: white;
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        animation: slideIn 0.3s ease;
+    }
+    
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+    
+    .close:hover {
+        color: #333;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+    
+    @media (max-width: 768px) {
+        .table-card {
+            padding: 10px 5px;
+        }
+        .table-number {
+            font-size: 20px;
+        }
+        .modal-content {
+            margin: 20% auto;
+            padding: 20px;
+        }
+    }
+</style>
+
 <script>
     function showAssignModal(userId, username) {
         document.getElementById('assignModal').style.display = 'block';
@@ -144,28 +310,51 @@
         document.getElementById('assignModal').style.display = 'none';
     }
     
-    // Close modal when clicking outside
+    function showTableDetails(tableNum, username, email) {
+        const modal = document.getElementById('tableModal');
+        const title = document.getElementById('modalTitle');
+        const body = document.getElementById('modalBody');
+        
+        title.innerHTML = `Table ${tableNum} Details`;
+        
+        if (username) {
+            body.innerHTML = `
+                <div style="text-align: center;">
+                    <i class="fas fa-user-circle" style="font-size: 48px; color: #667eea; margin-bottom: 15px;"></i>
+                    <p><strong>Customer:</strong> ${username}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Status:</strong> <span class="badge" style="background: #dc3545;">Occupied</span></p>
+                </div>
+            `;
+        } else {
+            body.innerHTML = `
+                <div style="text-align: center;">
+                    <i class="fas fa-check-circle" style="font-size: 48px; color: #28a745; margin-bottom: 15px;"></i>
+                    <p><strong>Table ${tableNum}</strong> is currently available</p>
+                    <p><strong>Status:</strong> <span class="badge" style="background: #28a745;">Free</span></p>
+                </div>
+            `;
+        }
+        
+        modal.style.display = 'block';
+    }
+    
+    function hideTableModal() {
+        document.getElementById('tableModal').style.display = 'none';
+    }
+    
+    // Close modals when clicking outside
     window.onclick = function(event) {
-        var modal = document.getElementById('assignModal');
-        if (event.target == modal) {
-            modal.style.display = 'none';
+        const assignModal = document.getElementById('assignModal');
+        const tableModal = document.getElementById('tableModal');
+        
+        if (event.target == assignModal) {
+            assignModal.style.display = 'none';
+        }
+        if (event.target == tableModal) {
+            tableModal.style.display = 'none';
         }
     }
 </script>
-
-<style>
-    @media (max-width: 768px) {
-        table {
-            font-size: 14px;
-        }
-        td, th {
-            padding: 8px 5px;
-        }
-        .btn {
-            padding: 5px 8px;
-            font-size: 11px;
-        }
-    }
-</style>
 
 {% endblock %}

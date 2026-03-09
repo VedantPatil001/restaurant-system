@@ -3,115 +3,424 @@
 
 <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
 
+<!-- Welcome Message -->
+<div class="welcome-banner">
+    <div class="welcome-text">
+        <h3>Welcome back, {{ session.username }}!</h3>
+        <p>Here's what's happening with your restaurant today.</p>
+    </div>
+    <div class="welcome-icon">
+        <i class="fas fa-chart-line"></i>
+    </div>
+</div>
+
 <!-- Stats Grid -->
 <div class="dashboard-grid">
     <!-- Order Stats -->
     <div class="dashboard-card">
-        <h3><i class="fas fa-shopping-cart"></i> Total Orders</h3>
-        <div class="number">{{ total_orders }}</div>
+        <div class="card-icon">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="card-content">
+            <h3>Total Orders</h3>
+            <div class="number">{{ total_orders }}</div>
+            <small>All time orders</small>
+        </div>
     </div>
     
     <div class="dashboard-card">
-        <h3><i class="fas fa-rupee-sign"></i> Total Revenue</h3>
-        <div class="number">₹{{ total_revenue }}</div>
+        <div class="card-icon">
+            <i class="fas fa-rupee-sign"></i>
+        </div>
+        <div class="card-content">
+            <h3>Total Revenue</h3>
+            <div class="number">₹{{ total_revenue }}</div>
+            <small>Completed orders</small>
+        </div>
     </div>
     
     <div class="dashboard-card">
-        <h3><i class="fas fa-clock"></i> Pending Orders</h3>
-        <div class="number">{{ pending_orders }}</div>
+        <div class="card-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="card-content">
+            <h3>Pending Orders</h3>
+            <div class="number">{{ pending_orders }}</div>
+            <small>Awaiting approval</small>
+        </div>
+    </div>
+    
+    <div class="dashboard-card">
+        <div class="card-icon">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div class="card-content">
+            <h3>Pending Payment</h3>
+            <div class="number">{{ pending_payment_orders }}</div>
+            <small>Awaiting payment</small>
+        </div>
     </div>
     
     <!-- Menu Stats -->
     <div class="dashboard-card">
-        <h3><i class="fas fa-utensils"></i> Menu Items</h3>
-        <div class="number">{{ total_menu }}</div>
+        <div class="card-icon">
+            <i class="fas fa-utensils"></i>
+        </div>
+        <div class="card-content">
+            <h3>Menu Items</h3>
+            <div class="number">{{ total_menu }}</div>
+            <small>Total dishes</small>
+        </div>
     </div>
     
     <div class="dashboard-card">
-        <h3><i class="fas fa-tags"></i> Categories</h3>
-        <div class="number">{{ total_categories }}</div>
+        <div class="card-icon">
+            <i class="fas fa-tags"></i>
+        </div>
+        <div class="card-content">
+            <h3>Categories</h3>
+            <div class="number">{{ total_categories }}</div>
+            <small>Food categories</small>
+        </div>
     </div>
     
     <div class="dashboard-card">
-        <h3><i class="fas fa-balance-scale"></i> Sizes</h3>
-        <div class="number">{{ total_sizes }}</div>
+        <div class="card-icon">
+            <i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="card-content">
+            <h3>Sizes</h3>
+            <div class="number">{{ total_sizes }}</div>
+            <small>Portion sizes</small>
+        </div>
     </div>
     
     <!-- User Stats -->
     <div class="dashboard-card">
-        <h3><i class="fas fa-users"></i> Total Users</h3>
-        <div class="number">{{ total_users }}</div>
+        <div class="card-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="card-content">
+            <h3>Total Users</h3>
+            <div class="number">{{ total_users }}</div>
+            <small>Registered users</small>
+        </div>
     </div>
     
     <div class="dashboard-card">
-        <h3><i class="fas fa-user"></i> Viewers</h3>
-        <div class="number">{{ total_viewers }}</div>
+        <div class="card-icon">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="card-content">
+            <h3>Viewers</h3>
+            <div class="number">{{ total_viewers }}</div>
+            <small>Regular customers</small>
+        </div>
     </div>
     
     <div class="dashboard-card">
-        <h3><i class="fas fa-user-shield"></i> Admins</h3>
-        <div class="number">{{ total_admins }}</div>
+        <div class="card-icon">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <div class="card-content">
+            <h3>Admins</h3>
+            <div class="number">{{ total_admins }}</div>
+            <small>Administrators</small>
+        </div>
     </div>
 </div>
 
 <!-- Quick Actions -->
-<div class="card">
-    <h3>Quick Actions</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;">
-        <a href="/admin/orders" class="btn btn-primary" style="text-align: center;">
-            <i class="fas fa-list"></i> Manage Orders
+<div class="quick-actions-card">
+    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+    <div class="actions-grid">
+        <a href="/admin/orders" class="action-btn">
+            <i class="fas fa-list"></i>
+            <span>Manage Orders</span>
         </a>
-        <a href="/menu" class="btn btn-primary" style="text-align: center;">
-            <i class="fas fa-utensils"></i> Manage Menu
+        <a href="/admin/menu/search" class="action-btn">
+            <i class="fas fa-search"></i>
+            <span>Search Menu</span>
         </a>
-        <a href="/categories" class="btn btn-primary" style="text-align: center;">
-            <i class="fas fa-tags"></i> Categories
+        <a href="/admin/orders/search" class="action-btn">
+            <i class="fas fa-search"></i>
+            <span>Search Orders</span>
         </a>
-        <a href="/quantities" class="btn btn-primary" style="text-align: center;">
-            <i class="fas fa-balance-scale"></i> Sizes
+        <a href="/admin/users/search" class="action-btn">
+            <i class="fas fa-search"></i>
+            <span>Search Users</span>
         </a>
-        <a href="/users" class="btn btn-primary" style="text-align: center;">
-            <i class="fas fa-users"></i> Manage Users
+        <a href="/menu" class="action-btn">
+            <i class="fas fa-utensils"></i>
+            <span>Manage Menu</span>
         </a>
-        <a href="/" class="btn btn-secondary" style="text-align: center;">
-            <i class="fas fa-eye"></i> View Public Menu
+        <a href="/categories" class="action-btn">
+            <i class="fas fa-tags"></i>
+            <span>Categories</span>
+        </a>
+        <a href="/quantities" class="action-btn">
+            <i class="fas fa-balance-scale"></i>
+            <span>Sizes</span>
+        </a>
+        <a href="/users" class="action-btn">
+            <i class="fas fa-users"></i>
+            <span>Manage Users</span>
+        </a>
+        <a href="/admin/tables" class="action-btn">
+            <i class="fas fa-chair"></i>
+            <span>Tables</span>
+        </a>
+        <a href="/" class="action-btn">
+            <i class="fas fa-eye"></i>
+            <span>View Public Menu</span>
         </a>
     </div>
 </div>
 
 <!-- Recent Users -->
 {% if recent_users %}
-<div class="card" style="margin-top: 20px;">
-    <h3>Recent Users</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in recent_users %}
-            <tr>
-                <td>{{ user[0] }}</td>
-                <td>{{ user[1] }}</td>
-                <td>{{ user[2] }}</td>
-                <td>
-                    {% if user[3] == 'admin' %}
-                        <span class="status-badge" style="background: #ff6b6b; color: white;">Admin</span>
-                    {% else %}
-                        <span class="status-badge" style="background: #4ecdc4; color: white;">Viewer</span>
-                    {% endif %}
-                </td>
-                <td>{{ user[4] if user[4] else 'N/A' }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="recent-users-card">
+    <h3><i class="fas fa-history"></i> Recent Users</h3>
+    <div class="users-list">
+        {% for user in recent_users %}
+        <div class="user-item">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+                <strong>{{ user[1] }}</strong>
+                <small>{{ user[2] }}</small>
+            </div>
+            <div class="user-role">
+                {% if user[3] == 'admin' %}
+                    <span class="role-badge admin">Admin</span>
+                {% else %}
+                    <span class="role-badge viewer">Viewer</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 {% endif %}
+
+<style>
+    .welcome-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 10px 30px rgba(102,126,234,0.3);
+    }
+    
+    .welcome-text h3 {
+        color: white;
+        margin: 0 0 5px 0;
+        font-size: 24px;
+    }
+    
+    .welcome-text p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    .welcome-icon i {
+        font-size: 48px;
+        opacity: 0.5;
+    }
+    
+    .dashboard-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border-color: #667eea;
+    }
+    
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .card-icon i {
+        font-size: 24px;
+        color: white;
+    }
+    
+    .card-content {
+        flex: 1;
+    }
+    
+    .card-content h3 {
+        margin: 0 0 5px 0;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .card-content .number {
+        font-size: 28px;
+        font-weight: bold;
+        color: #333;
+        line-height: 1.2;
+    }
+    
+    .card-content small {
+        color: #999;
+        font-size: 12px;
+    }
+    
+    .quick-actions-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 30px 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .action-btn {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    
+    .action-btn:hover {
+        background: white;
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102,126,234,0.2);
+    }
+    
+    .action-btn i {
+        font-size: 24px;
+        color: #667eea;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .action-btn span {
+        font-size: 13px;
+        font-weight: 500;
+    }
+    
+    .recent-users-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .users-list {
+        margin-top: 20px;
+    }
+    
+    .user-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.3s ease;
+    }
+    
+    .user-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .user-item:last-child {
+        border-bottom: none;
+    }
+    
+    .user-avatar i {
+        font-size: 40px;
+        color: #667eea;
+        margin-right: 15px;
+    }
+    
+    .user-details {
+        flex: 1;
+    }
+    
+    .user-details strong {
+        display: block;
+        color: #333;
+    }
+    
+    .user-details small {
+        color: #999;
+        font-size: 12px;
+    }
+    
+    .role-badge {
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .role-badge.admin {
+        background: #ff6b6b;
+    }
+    
+    .role-badge.viewer {
+        background: #4ecdc4;
+    }
+    
+    @media (max-width: 768px) {
+        .welcome-banner {
+            flex-direction: column;
+            text-align: center;
+            gap: 15px;
+        }
+        
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .user-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 10px;
+        }
+        
+        .user-avatar i {
+            margin-right: 0;
+        }
+    }
+</style>
 
 {% endblock %}

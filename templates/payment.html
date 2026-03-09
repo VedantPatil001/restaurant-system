@@ -1,29 +1,172 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="card" style="max-width: 500px; margin: 0 auto; padding: 30px;">
-    <h2 class="text-center"><i class="fas fa-credit-card"></i> Payment</h2>
-    
-    <div class="text-center">
-        <p><strong>Order ID:</strong> #{{ order_id }}</p>
-        <p>Click the button below to complete your payment.</p>
+<div class="simple-payment-container">
+    <div class="payment-card">
+        <div class="payment-status">
+            <i class="fas fa-credit-card"></i>
+        </div>
         
-        <div style="margin: 30px 0;">
-            <a href="/payment_success/{{ order_id }}" class="btn btn-success" style="padding: 12px 30px;">
-                <i class="fas fa-check"></i> Complete Payment
+        <h2>Complete Payment</h2>
+        
+        <div class="order-info">
+            <p><strong>Order ID:</strong> #{{ order_id }}</p>
+        </div>
+        
+        <div class="payment-note">
+            <i class="fas fa-info-circle"></i>
+            <p>After payment, your order will be pending admin approval.</p>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/payment_success/{{ order_id }}" class="btn btn-success btn-large">
+                <i class="fas fa-check"></i> Simulate Payment
             </a>
-            <a href="/my_orders" class="btn btn-secondary" style="padding: 12px 30px;">
+            <a href="/my_orders" class="btn btn-secondary btn-large">
                 <i class="fas fa-times"></i> Cancel
             </a>
         </div>
         
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 5px;">
-            <p style="color: #666;">
-                <strong>Note:</strong> After payment, your order will be pending admin approval.
-                You'll be notified when admin approves your order.
-            </p>
+        <div class="security-note">
+            <i class="fas fa-lock"></i>
+            <span>Secure transaction powered by Razorpay</span>
         </div>
     </div>
 </div>
+
+<style>
+    .simple-payment-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .payment-card {
+        background: white;
+        border-radius: 30px;
+        padding: 50px;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        animation: scaleIn 0.5s ease;
+    }
+    
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    .payment-status {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+    }
+    
+    .payment-status i {
+        font-size: 48px;
+        color: white;
+    }
+    
+    .payment-card h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+    
+    .order-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+    
+    .order-info p {
+        margin: 0;
+        color: #666;
+    }
+    
+    .order-info strong {
+        color: #333;
+    }
+    
+    .payment-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        text-align: left;
+    }
+    
+    .payment-note i {
+        color: #1976d2;
+        font-size: 20px;
+    }
+    
+    .payment-note p {
+        margin: 0;
+        color: #1976d2;
+        font-size: 14px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .btn-large {
+        flex: 1;
+        padding: 15px !important;
+        font-size: 16px !important;
+    }
+    
+    .security-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #666;
+        font-size: 13px;
+    }
+    
+    .security-note i {
+        color: #28a745;
+    }
+    
+    @media (max-width: 768px) {
+        .payment-card {
+            padding: 30px;
+        }
+        
+        .payment-status {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .payment-status i {
+            font-size: 36px;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
 
 {% endblock %}

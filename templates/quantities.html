@@ -1,46 +1,282 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2><i class="fas fa-balance-scale"></i> Manage Sizes</h2>
+<div class="quantities-container">
+    <h2><i class="fas fa-balance-scale"></i> Manage Sizes</h2>
 
-<div class="form-card">
-    <h3>Add New Size</h3>
-    <form method="POST">
-        <label>Size Name</label>
-        <input type="text" name="size" placeholder="Enter size (e.g., Small, Medium, Large)" required>
-        <button type="submit" class="btn-success">
-            <i class="fas fa-plus"></i> Add Size
-        </button>
-    </form>
+    <!-- Add New Size Card -->
+    <div class="add-card">
+        <h3><i class="fas fa-plus-circle"></i> Add New Size</h3>
+        <form method="POST" class="add-form">
+            <div class="form-group">
+                <label for="size">Size Name</label>
+                <input type="text" id="size" name="size" 
+                       placeholder="e.g., Small, Medium, Large" required>
+                <small>Enter a unique size name</small>
+            </div>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add Size
+            </button>
+        </form>
+    </div>
+
+    <!-- Size List -->
+    <div class="sizes-card">
+        <h3><i class="fas fa-list"></i> Size List</h3>
+        
+        {% if quantities %}
+        <div class="sizes-grid">
+            {% for q in quantities %}
+            <div class="size-item">
+                <div class="size-info">
+                    <span class="size-id">#{{ q[0] }}</span>
+                    <span class="size-name">{{ q[1] }}</span>
+                </div>
+                <div class="size-actions">
+                    <a href="/quantity/edit/{{ q[0] }}" class="btn btn-warning btn-sm" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="/quantity/delete/{{ q[0] }}" class="btn btn-danger btn-sm" 
+                       onclick="return confirm('Delete size {{ q[1] }}? This will affect menu items.')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Size Statistics -->
+        <div class="size-stats">
+            <div class="stat">
+                <span class="stat-label">Total Sizes</span>
+                <span class="stat-value">{{ quantities|length }}</span>
+            </div>
+        </div>
+        
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-balance-scale"></i>
+            <h3>No sizes found</h3>
+            <p>Add your first size to get started</p>
+        </div>
+        {% endif %}
+    </div>
 </div>
 
-<h3>Size List</h3>
-
-<table>
-    <thead>
-        <tr>
-
-            <th>Size</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for q in quantities %}
-        <tr>
-
-            <td>{{ q[1] }}</td>
-            <td>
-                <a href="/quantity/edit/{{ q[0] }}" class="btn btn-warning">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
-                <a href="/quantity/delete/{{ q[0] }}" class="btn btn-danger"
-                   onclick="return confirm('Delete this size?')">
-                   <i class="fas fa-trash"></i> Delete
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<style>
+    .quantities-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .quantities-container h2 {
+        margin-bottom: 30px;
+        color: #333;
+    }
+    
+    .quantities-container h2 i {
+        color: #667eea;
+        margin-right: 10px;
+    }
+    
+    .add-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .add-card h3 {
+        margin: 0 0 20px 0;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .add-card h3 i {
+        color: #28a745;
+    }
+    
+    .add-form {
+        max-width: 400px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    
+    .form-group small {
+        display: block;
+        margin-top: 5px;
+        color: #999;
+        font-size: 12px;
+    }
+    
+    .sizes-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .sizes-card h3 {
+        margin: 0 0 20px 0;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .sizes-card h3 i {
+        color: #667eea;
+    }
+    
+    .sizes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .size-item {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    
+    .size-item:hover {
+        border-color: #667eea;
+        transform: translateX(5px);
+        background: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .size-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .size-id {
+        font-size: 12px;
+        color: #999;
+        background: white;
+        padding: 3px 6px;
+        border-radius: 4px;
+    }
+    
+    .size-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .size-actions {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .size-stats {
+        border-top: 1px solid #e0e0e0;
+        padding-top: 20px;
+        margin-top: 10px;
+    }
+    
+    .stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+    }
+    
+    .empty-state i {
+        font-size: 60px;
+        color: #ccc;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h3 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        color: #666;
+    }
+    
+    @media (max-width: 768px) {
+        .sizes-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .size-item {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+        }
+        
+        .size-info {
+            flex-direction: column;
+        }
+        
+        .size-actions {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
 
 {% endblock %}

@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     
     <!-- SEO Meta Tags -->
     <title>🍽️ FoodieExpress - Restaurant Food Ordering System</title>
     <meta name="description" content="Order food online from your favorite restaurant. Browse menu, place orders, and get delivery to your table. Fast and secure payment.">
-    <meta name="keywords" content="restaurant, food ordering, online menu, table service, food delivery, dining">
+    <meta name="keywords" content="restaurant, food ordering, online menu, table service, food delivery, dining, search menu">
     <meta name="author" content="Vedant Patil">
     <meta name="robots" content="index, follow">
     
@@ -30,7 +30,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preconnect" href="https://checkout.razorpay.com">
     
-    <!-- Font Awesome with Subresource Integrity for security -->
+    <!-- Font Awesome with Subresource Integrity -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
           integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" 
           crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -38,11 +38,237 @@
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
-    <!-- Defer non-critical CSS -->
     <style>
-        /* Critical CSS for above-the-fold content */
-        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 30px; }
-        .flash-container { margin-bottom: 20px; }
+        /* Dropdown menu styles for search */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border-radius: 12px;
+            padding: 8px 0;
+            top: 100%;
+            left: 0;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-menu li {
+            display: block;
+            list-style: none;
+        }
+
+        .dropdown-menu a {
+            color: #333 !important;
+            background: none !important;
+            padding: 12px 20px !important;
+            white-space: nowrap;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border-radius: 0;
+        }
+
+        .dropdown-menu a:hover {
+            background: #f8f9ff !important;
+            color: #667eea !important;
+            padding-left: 25px !important;
+        }
+
+        .dropdown-menu a i {
+            width: 20px;
+            color: #667eea;
+        }
+
+        /* Search bar styles */
+        .search-container {
+            background: white;
+            border-radius: 50px;
+            padding: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+
+        .search-container:hover,
+        .search-container:focus-within {
+            box-shadow: 0 8px 24px rgba(102,126,234,0.2);
+            transform: translateY(-2px);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            border-radius: 50px;
+            outline: none;
+            background: transparent;
+        }
+
+        .search-select {
+            border: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            border-radius: 50px;
+            outline: none;
+            background: #f8f9fa;
+            color: #333;
+            cursor: pointer;
+            min-width: 150px;
+            border-left: 2px solid #e0e0e0;
+        }
+
+        .search-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+
+        .clear-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clear-button:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .results-count {
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        /* Responsive search */
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+            }
+            .search-input,
+            .search-select,
+            .search-button,
+            .clear-button {
+                width: 100%;
+                border-radius: 10px;
+            }
+            .search-select {
+                border-left: none;
+                border-top: 2px solid #e0e0e0;
+            }
+            .dropdown-menu {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                border: 1px solid #e0e0e0;
+            }
+        }
+
+        /* Animation for cards */
+        .card {
+            animation: cardFadeIn 0.5s ease;
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty state styling */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            margin: 20px 0;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #999;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -54,34 +280,45 @@
             <div class="logo" aria-label="FoodieExpress logo">FoodieExpress</div>
 
             <ul class="nav-links">
-                <li><a href="/" aria-current="{% if request.path == '/' %}page{% endif %}"><i class="fas fa-home" aria-hidden="true"></i> Menu</a></li>
+                <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}><i class="fas fa-home" aria-hidden="true"></i> Menu</a></li>
 
                 {% if session.get('role') == 'admin' %}
-                    <li><a href="/dashboard"><i class="fas fa-tachometer-alt" aria-hidden="true"></i> Dashboard</a></li>
-                    <li><a href="/admin/tables"><i class="fas fa-chair" aria-hidden="true"></i> Tables</a></li>
-                    <li><a href="/admin/orders"><i class="fas fa-list" aria-hidden="true"></i> Orders</a></li>
-                    <li><a href="/menu"><i class="fas fa-utensils" aria-hidden="true"></i> Menu</a></li>
-                    <li><a href="/categories"><i class="fas fa-tags" aria-hidden="true"></i> Categories</a></li>
-                    <li><a href="/quantities"><i class="fas fa-balance-scale" aria-hidden="true"></i> Sizes</a></li>
-                    <li><a href="/users"><i class="fas fa-users" aria-hidden="true"></i> Users</a></li>
+                    <li><a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    
+                    <!-- Search Dropdown for Admin -->
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle"><i class="fas fa-search"></i> Search <i class="fas fa-caret-down"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/admin/menu/search"><i class="fas fa-utensils"></i> Search Menu</a></li>
+                            <li><a href="/admin/orders/search"><i class="fas fa-list"></i> Search Orders</a></li>
+                            <li><a href="/admin/users/search"><i class="fas fa-users"></i> Search Users</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li><a href="/admin/tables"><i class="fas fa-chair"></i> Tables</a></li>
+                    <li><a href="/admin/orders"><i class="fas fa-list"></i> Orders</a></li>
+                    <li><a href="/menu"><i class="fas fa-utensils"></i> Menu</a></li>
+                    <li><a href="/categories"><i class="fas fa-tags"></i> Categories</a></li>
+                    <li><a href="/quantities"><i class="fas fa-balance-scale"></i> Sizes</a></li>
+                    <li><a href="/users"><i class="fas fa-users"></i> Users</a></li>
                 {% endif %}
 
                 {% if session.get('role') == 'viewer' %}
-                    <li><a href="/cart"><i class="fas fa-shopping-cart" aria-hidden="true"></i> Cart
+                    <li><a href="/cart"><i class="fas fa-shopping-cart"></i> Cart
                         {% if session.get('cart') %}
-                            <span class="cart-badge" aria-label="{{ session.cart|length }} items in cart">{{ session.cart|length }}</span>
+                            <span class="cart-badge">{{ session.cart|length }}</span>
                         {% endif %}
                     </a></li>
-                    <li><a href="/my_orders"><i class="fas fa-clipboard-list" aria-hidden="true"></i> My Orders</a></li>
+                    <li><a href="/my_orders"><i class="fas fa-clipboard-list"></i> My Orders</a></li>
                 {% endif %}
 
                 {% if session.get('username') %}
-                    <li class="welcome"><i class="fas fa-user" aria-hidden="true"></i> {{ session.get('username') }}</li>
-                    <li><a href="/profile"><i class="fas fa-id-card" aria-hidden="true"></i> Profile</a></li>
-                    <li><a href="/logout"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Logout</a></li>
+                    <li class="welcome"><i class="fas fa-user"></i> {{ session.get('username') }}</li>
+                    <li><a href="/profile"><i class="fas fa-id-card"></i> Profile</a></li>
+                    <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 {% else %}
-                    <li><a href="/login"><i class="fas fa-sign-in-alt" aria-hidden="true"></i> Login</a></li>
-                    <li><a href="/signup"><i class="fas fa-user-plus" aria-hidden="true"></i> Signup</a></li>
+                    <li><a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="/signup"><i class="fas fa-user-plus"></i> Signup</a></li>
                 {% endif %}
             </ul>
         </nav>
@@ -98,7 +335,7 @@
                                     {% elif category == 'error' %}fa-exclamation-circle
                                     {% elif category == 'warning' %}fa-exclamation-triangle
                                     {% elif category == 'info' %}fa-info-circle
-                                    {% else %}fa-info-circle{% endif %}" aria-hidden="true">
+                                    {% else %}fa-info-circle{% endif %}">
                                 </i> 
                                 <span>{{ message }}</span>
                                 <button class="flash-close" onclick="this.parentElement.remove()" aria-label="Close message">&times;</button>
@@ -116,12 +353,11 @@
         </footer>
     </div>
 
-    <!-- Defer non-critical JavaScript -->
+    <!-- JavaScript -->
     <script>
         // Auto-hide flash messages after 5 seconds
         setTimeout(function() {
-            var flashMessages = document.querySelectorAll('.flash-message');
-            flashMessages.forEach(function(message) {
+            document.querySelectorAll('.flash-message').forEach(function(message) {
                 message.style.transition = 'opacity 0.5s ease';
                 message.style.opacity = '0';
                 setTimeout(function() {
@@ -130,12 +366,25 @@
             });
         }, 5000);
 
-        // Add main landmark detection for accessibility
-        document.addEventListener('DOMContentLoaded', function() {
-            var main = document.getElementById('main-content');
-            if (main) {
-                main.setAttribute('role', 'main');
-            }
+        // Add loading spinner to search forms
+        document.querySelectorAll('.search-form').forEach(function(form) {
+            form.addEventListener('submit', function() {
+                const button = form.querySelector('button[type="submit"]');
+                if (button) {
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+                    button.disabled = true;
+                }
+            });
+        });
+
+        // Smooth scroll to top
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
         });
     </script>
     

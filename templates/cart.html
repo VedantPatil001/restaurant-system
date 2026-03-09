@@ -6,34 +6,32 @@
 {% if items %}
     <div class="cart-items">
         {% for item in items %}
-            <div class="cart-item" style="display: grid; grid-template-columns: 3fr 1fr 2fr 1fr 1fr; align-items: center; gap: 10px; padding: 15px; background: white; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <div class="item-name">
-                    <strong>{{ item.name }}</strong>
-                    <br>
-                    <small style="color: #666;">₹{{ item.price }} each</small>
+            <div class="cart-item animate__animated animate__fadeIn">
+                <div class="item-info">
+                    <h4>{{ item.name }}</h4>
+                    <p class="item-price">₹{{ item.price }} each</p>
                 </div>
                 
-                <div class="item-price text-center">
-                    <strong>₹{{ item.price }}</strong>
+                <div class="item-quantity">
+                    <div class="quantity-controls">
+                        <a href="/update_cart/{{ item.mid }}/decrease" class="qty-btn minus" title="Decrease quantity">
+                            <i class="fas fa-minus"></i>
+                        </a>
+                        <span class="qty-value">{{ item.qty }}</span>
+                        <a href="/update_cart/{{ item.mid }}/increase" class="qty-btn plus" title="Increase quantity">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                    </div>
                 </div>
                 
-                <div class="item-qty" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <a href="/update_cart/{{ item.mid }}/decrease" class="btn btn-warning" style="padding: 5px 10px; font-size: 16px; min-width: 35px;">
-                        <i class="fas fa-minus"></i>
-                    </a>
-                    <span style="font-size: 18px; font-weight: bold; min-width: 40px; text-align: center;">{{ item.qty }}</span>
-                    <a href="/update_cart/{{ item.mid }}/increase" class="btn btn-success" style="padding: 5px 10px; font-size: 16px; min-width: 35px;">
-                        <i class="fas fa-plus"></i>
-                    </a>
+                <div class="item-subtotal">
+                    <span>Subtotal:</span>
+                    <strong>₹{{ item.subtotal }}</strong>
                 </div>
                 
-                <div class="item-subtotal text-center">
-                    <strong style="color: #28a745;">₹{{ item.subtotal }}</strong>
-                </div>
-                
-                <div class="item-actions text-right">
-                    <a href="/update_cart/{{ item.mid }}/remove" class="btn btn-danger" 
-                       onclick="return confirm('Remove this item from cart?')" style="padding: 5px 10px;">
+                <div class="item-actions">
+                    <a href="/update_cart/{{ item.mid }}/remove" class="btn-remove" 
+                       onclick="return confirm('Remove this item from cart?')" title="Remove item">
                         <i class="fas fa-trash"></i>
                     </a>
                 </div>
@@ -41,70 +39,226 @@
         {% endfor %}
     </div>
 
-    <div class="card" style="margin-top: 2rem; padding: 20px;">
+    <div class="order-summary-card">
         <h3>Order Summary</h3>
-        <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+        
+        <div class="summary-row">
             <span>Subtotal:</span>
-            <span><strong>₹{{ total }}</strong></span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin: 10px 0;">
-            <span>Delivery Fee:</span>
-            <span><strong class="text-success">FREE</strong></span>
-        </div>
-        <hr>
-        <div style="display: flex; justify-content: space-between; margin: 10px 0; font-size: 1.2rem;">
-            <span>Total:</span>
-            <span><strong style="color: #28a745;">₹{{ total }}</strong></span>
+            <span>₹{{ total }}</span>
         </div>
         
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-            <a href="/place_order" class="btn btn-success" style="flex: 2; padding: 12px;" 
+        <div class="summary-row">
+            <span>Delivery Fee:</span>
+            <span class="free-delivery">FREE</span>
+        </div>
+        
+        <div class="summary-row total">
+            <span>Total:</span>
+            <span>₹{{ total }}</span>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/place_order" class="btn btn-success btn-large" 
                onclick="return confirm('Place this order?')">
                 <i class="fas fa-check"></i> Place Order
             </a>
-            <a href="/clear_cart" class="btn btn-danger" style="flex: 1; padding: 12px;" 
+            <a href="/clear_cart" class="btn btn-danger btn-large" 
                onclick="return confirm('Clear your entire cart?')">
-                <i class="fas fa-trash"></i> Clear
+                <i class="fas fa-trash"></i> Clear Cart
             </a>
         </div>
         
-        <div style="margin-top: 1rem; text-align: center;">
-            <a href="/" class="btn btn-primary" style="padding: 10px 20px;">
-                <i class="fas fa-utensils"></i> Continue Shopping
+        <div class="continue-shopping">
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Continue Shopping
             </a>
         </div>
     </div>
 {% else %}
-    <div class="card text-center" style="padding: 3rem;">
-        <i class="fas fa-shopping-cart" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
-        <h3>Your cart is empty</h3>
-        <p style="color: #666; margin: 1rem 0;">Browse our menu and add some delicious items!</p>
-        <a href="/" class="btn btn-primary" style="padding: 12px 30px;">
-            <i class="fas fa-utensils"></i> View Menu
-        </a>
+    <div class="empty-cart">
+        <div class="empty-state">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Your cart is empty</h3>
+            <p>Looks like you haven't added any items to your cart yet.</p>
+            <a href="/" class="btn btn-primary btn-large">
+                <i class="fas fa-utensils"></i> Browse Menu
+            </a>
+        </div>
     </div>
 {% endif %}
 
 <style>
+    .cart-item {
+        display: grid;
+        grid-template-columns: 3fr 2fr 1fr auto;
+        align-items: center;
+        gap: 20px;
+        padding: 20px;
+        background: white;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+    }
+    
     .cart-item:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.15) !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border-color: #667eea;
+    }
+    
+    .item-info h4 {
+        margin: 0 0 5px 0;
+        color: #333;
+    }
+    
+    .item-price {
+        color: #666;
+        font-size: 14px;
+        margin: 0;
+    }
+    
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f8f9fa;
+        padding: 5px;
+        border-radius: 30px;
+        width: fit-content;
+    }
+    
+    .qty-btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
         transition: all 0.3s ease;
+    }
+    
+    .qty-btn.minus {
+        background: #ffc107;
+        color: #212529;
+    }
+    
+    .qty-btn.plus {
+        background: #28a745;
+        color: white;
+    }
+    
+    .qty-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .qty-value {
+        font-size: 18px;
+        font-weight: bold;
+        min-width: 30px;
+        text-align: center;
+    }
+    
+    .item-subtotal {
+        text-align: right;
+    }
+    
+    .item-subtotal span {
+        display: block;
+        font-size: 12px;
+        color: #666;
+    }
+    
+    .item-subtotal strong {
+        font-size: 18px;
+        color: #28a745;
+    }
+    
+    .btn-remove {
+        color: #dc3545;
+        font-size: 20px;
+        transition: all 0.3s ease;
+        padding: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    
+    .btn-remove:hover {
+        background: #dc3545;
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .order-summary-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .summary-row.total {
+        border-bottom: none;
+        font-size: 18px;
+        font-weight: bold;
+        color: #28a745;
+        padding-top: 15px;
+    }
+    
+    .free-delivery {
+        color: #28a745;
+        font-weight: 600;
+    }
+    
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .btn-large {
+        padding: 15px !important;
+        font-size: 16px !important;
+        text-align: center;
+    }
+    
+    .continue-shopping {
+        text-align: center;
+    }
+    
+    .empty-cart {
+        max-width: 400px;
+        margin: 50px auto;
     }
     
     @media (max-width: 768px) {
         .cart-item {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: 1fr;
             text-align: center;
-            gap: 15px !important;
+            gap: 15px;
         }
         
-        .item-qty {
-            justify-content: center;
+        .quantity-controls {
+            margin: 0 auto;
         }
         
-        .item-actions {
-            text-align: center !important;
+        .item-subtotal {
+            text-align: center;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
         }
     }
 </style>

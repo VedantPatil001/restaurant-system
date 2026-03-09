@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="clearfix">
+    <h2 style="float: left;"><i class="fas fa-search"></i> Search Menu Items</h2>
+    <a href="/menu/add" class="btn btn-success" style="float: right;">
+        <i class="fas fa-plus"></i> Add New Item
+    </a>
+</div>
+
+<!-- Search Bar -->
+<div class="search-container">
+    <form class="search-form" method="GET" action="/admin/menu/search">
+        <input type="text" name="q" class="search-input" 
+               placeholder="Search by name or category..." 
+               value="{{ search_query }}">
+        
+        <select name="category" class="search-select">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+            <option value="{{ category[0] }}" {% if category_filter == category[0] %}selected{% endif %}>
+                {{ category[0] }}
+            </option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit" class="search-button">
+            <i class="fas fa-search"></i> Search
+        </button>
+        
+        {% if search_query or category_filter %}
+        <a href="/admin/menu/search" class="clear-button">
+            <i class="fas fa-times"></i> Clear
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Results count -->
+{% if search_query or category_filter %}
+<div class="results-count">
+    <i class="fas fa-info-circle"></i> Found {{ menus|length }} item(s)
+    {% if search_query %} matching "{{ search_query }}"{% endif %}
+    {% if category_filter %} in category "{{ category_filter }}"{% endif %}
+</div>
+{% endif %}
+
+<!-- Results Table -->
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>Size</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in menus %}
+        <tr>
+            <td>#{{ m[0] }}</td>
+            <td><strong>{{ m[1] }}</strong></td>
+            <td>₹{{ m[2] }}</td>
+            <td><span class="badge" style="background: #667eea; color: white; padding: 3px 8px; border-radius: 20px;">{{ m[3] }}</span></td>
+            <td>{{ m[4] }}</td>
+            <td>
+                <a href="/menu/edit/{{ m[0] }}" class="btn btn-warning btn-sm">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a href="/menu/delete/{{ m[0] }}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('Delete this item?')">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if not menus and search_query %}
+<div class="empty-state">
+    <i class="fas fa-search"></i>
+    <h3>No menu items found</h3>
+    <p>No items match your search criteria "{{ search_query }}"</p>
+    <a href="/admin/menu/search" class="btn btn-primary">
+        <i class="fas fa-times"></i> Clear Search
+    </a>
+</div>
+{% endif %}
+
+<style>
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+    .badge {
+        display: inline-block;
+    }
+</style>
+
+{% endblock %}
