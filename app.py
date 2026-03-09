@@ -21,28 +21,6 @@ import time
 import os
 
 app = Flask(__name__)
-# Replace the existing CSP header with this more permissive one
-@app.after_request
-def add_security_headers(response):
-    # More permissive CSP for development/testing
-    response.headers['Content-Security-Policy'] = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://cdnjs.cloudflare.com https://code.jquery.com; "
-        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
-        "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; "
-        "img-src 'self' data: https:; "
-        "connect-src 'self'; "
-        "frame-src https://checkout.razorpay.com;"
-    )
-    
-    # Keep other security headers
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    
-    return response
 
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24).hex())
 
