@@ -21,29 +21,29 @@ import time
 import os
 
 app = Flask(__name__)
-# Add security headers
+# Replace the existing CSP header with this more permissive one
 @app.after_request
 def add_security_headers(response):
-    # Content Security Policy
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' https://checkout.razorpay.com https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; font-src 'self' https://cdnjs.cloudflare.com data:; img-src 'self' data: https:; connect-src 'self';"
+    # More permissive CSP for development/testing
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://cdnjs.cloudflare.com https://code.jquery.com; "
+        "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
+        "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self'; "
+        "frame-src https://checkout.razorpay.com;"
+    )
     
-    # HSTS (HTTP Strict Transport Security)
+    # Keep other security headers
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
-    
-    # Prevent clickjacking
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    
-    # XSS Protection
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-XSS-Protection'] = '1; mode=block'
-    
-    # Referrer Policy
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     
-    # Permissions Policy
-    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
-    
     return response
+
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24).hex())
 
 # ================= RAZORPAY CONFIGURATION =================
