@@ -3,114 +3,125 @@
 
 <h2><i class="fas fa-list"></i> Manage Orders</h2>
 
-<table>
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Customer</th>
-            <th>Table #</th>
-            <th>Total Price</th>
-            <th>Payment Method</th>
-            <th>Payment Status</th>
-            <th>Order Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for order in orders %}
-        <tr>
-            <td>#{{ order[0] }}</td>
-            <td>{{ order[1] }}</td>
-            <td>
-    {% if order[7] %}  <!-- Assuming table_number is at index 7 -->
-        <span style="font-size: 16px; font-weight: bold; color: #28a745;">{{ order[7] }}</span>
-    {% else %}
-        <span style="color: #999;">-</span>
-    {% endif %}
-</td>
-            <td>₹{{ order[2] }}</td>
-            <td>
-                {% if order[4] == 'Cash' %}
-                    <span style="color: #28a745;">
-                        <i class="fas fa-money-bill-wave"></i> Cash
+<div style="overflow-x: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Table</th>
+                <th>Total</th>
+                <th>Order Date</th>
+                <th>Last Updated</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order[0] }}</td>
+                <td>{{ order[1] }}</td>
+                <td>
+                    {% if order[7] %}
+                        <span style="font-weight: bold; color: #28a745;">Table {{ order[7] }}</span>
+                    {% else %}
+                        <span style="color: #999;">-</span>
+                    {% endif %}
+                </td>
+                <td><strong>₹{{ order[2] }}</strong></td>
+                <td>
+                    <span style="font-size: 12px;">
+                        <i class="fas fa-calendar-alt"></i> {{ order[8] }}
                     </span>
-                {% else %}
-                    <span style="color: #007bff;">
-                        <i class="fas fa-credit-card"></i> Online
+                </td>
+                <td>
+                    <span style="font-size: 12px; color: #666;">
+                        <i class="fas fa-clock"></i> {{ order[9] }}
                     </span>
-                {% endif %}
-            </td>
-            <td>
-                {% if order[5] == 'Completed' %}
-                    <span class="status-badge status-completed">Paid</span>
-                {% elif order[5] == 'Failed' %}
-                    <span class="status-badge status-rejected">Failed</span>
-                {% else %}
-                    <span class="status-badge status-pending">Pending</span>
-                {% endif %}
-            </td>
-            <td>
-                {% if order[3] == 'Pending Payment' %}
-                    <span class="status-badge status-pending-payment">Awaiting Payment</span>
-                {% elif order[3] == 'Pending' %}
-                    <span class="status-badge status-pending">Pending Approval</span>
-                {% elif order[3] == 'Approved' %}
-                    <span class="status-badge status-approved">Approved</span>
-                {% elif order[3] == 'Completed' %}
-                    <span class="status-badge status-completed">Completed</span>
-                {% elif order[3] == 'Rejected' %}
-                    <span class="status-badge status-rejected">Rejected</span>
-                {% elif order[3] == 'Cancelled' %}
-                    <span class="status-badge status-cancelled">Cancelled</span>
-                {% elif order[3] == 'Payment Failed' %}
-                    <span class="status-badge status-rejected">Payment Failed</span>
-                {% else %}
-                    {{ order[3] }}
-                {% endif %}
-            </td>
-            <td>
-                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                    <a href="/order_details/{{ order[0] }}" class="btn btn-info" title="View Details">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    
-                    <!-- Order Status Actions -->
-                    {% if order[3] == 'Pending' or order[3] == 'Pending Payment' %}
-                        <a href="/admin/update_order_status/{{ order[0] }}/approve" class="btn btn-success" 
-                           onclick="return confirm('Approve this order?')" title="Approve Order">
-                            <i class="fas fa-check"></i> Approve
-                        </a>
-                        <a href="/admin/reject_order/{{ order[0] }}" class="btn btn-danger" 
-                           onclick="return confirm('Reject this order?')" title="Reject Order">
-                            <i class="fas fa-times"></i> Reject
-                        </a>
+                </td>
+                <td>
+                    {% if order[4] == 'Cash' %}
+                        <span style="color: #28a745;">
+                            <i class="fas fa-money-bill-wave"></i> Cash
+                        </span>
+                    {% else %}
+                        <span style="color: #007bff;">
+                            <i class="fas fa-credit-card"></i> Online
+                        </span>
                     {% endif %}
-                    
-                    {% if order[3] == 'Approved' %}
-                        <a href="/admin/complete_order/{{ order[0] }}" class="btn btn-success" 
-                           onclick="return confirm('Mark this order as completed?')" title="Complete Order">
-                            <i class="fas fa-check-double"></i> Complete
-                        </a>
+                    <br>
+                    <small>
+                        {% if order[5] == 'Completed' %}
+                            <span class="status-badge status-completed">Paid</span>
+                        {% elif order[5] == 'Failed' %}
+                            <span class="status-badge status-rejected">Failed</span>
+                        {% else %}
+                            <span class="status-badge status-pending">Pending</span>
+                        {% endif %}
+                    </small>
+                </td>
+                <td>
+                    {% if order[3] == 'Pending Payment' %}
+                        <span class="status-badge status-pending-payment">Awaiting Payment</span>
+                    {% elif order[3] == 'Pending' %}
+                        <span class="status-badge status-pending">Pending Approval</span>
+                    {% elif order[3] == 'Approved' %}
+                        <span class="status-badge status-approved">Approved</span>
+                    {% elif order[3] == 'Completed' %}
+                        <span class="status-badge status-completed">Completed</span>
+                    {% elif order[3] == 'Rejected' %}
+                        <span class="status-badge status-rejected">Rejected</span>
+                    {% elif order[3] == 'Cancelled' %}
+                        <span class="status-badge status-cancelled">Cancelled</span>
+                    {% elif order[3] == 'Payment Failed' %}
+                        <span class="status-badge status-rejected">Payment Failed</span>
+                    {% else %}
+                        {{ order[3] }}
                     {% endif %}
-                    
-                    <!-- Payment Actions for COD -->
-                    {% if order[4] == 'Cash' and order[5] == 'Pending' %}
-                        <a href="/update_payment_status/{{ order[0] }}" class="btn btn-primary" 
-                           onclick="return confirm('Mark payment as received?')" title="Mark Paid">
-                            <i class="fas fa-money-bill"></i> Mark Paid
+                </td>
+                <td>
+                    <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+                        <a href="/order_details/{{ order[0] }}" class="btn btn-info" title="View Details">
+                            <i class="fas fa-eye"></i>
                         </a>
-                    {% endif %}
-                    
-                    <!-- Invoice -->
-                    <a href="/invoice/{{ order[0] }}" class="btn btn-secondary" title="Download Invoice">
-                        <i class="fas fa-file-invoice"></i>
-                    </a>
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                        
+                        {% if order[3] == 'Pending' or order[3] == 'Pending Payment' %}
+                            <a href="/admin/update_order_status/{{ order[0] }}/approve" class="btn btn-success" 
+                               onclick="return confirm('Approve this order?')" title="Approve">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            <a href="/admin/reject_order/{{ order[0] }}" class="btn btn-danger" 
+                               onclick="return confirm('Reject this order?')" title="Reject">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% if order[3] == 'Approved' %}
+                            <a href="/admin/complete_order/{{ order[0] }}" class="btn btn-success" 
+                               onclick="return confirm('Mark as completed?')" title="Complete">
+                                <i class="fas fa-check-double"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% if order[4] == 'Cash' and order[5] == 'Pending' %}
+                            <a href="/update_payment_status/{{ order[0] }}" class="btn btn-primary" 
+                               onclick="return confirm('Mark payment as received?')" title="Mark Paid">
+                                <i class="fas fa-money-bill"></i>
+                            </a>
+                        {% endif %}
+                        
+                        <a href="/invoice/{{ order[0] }}" class="btn btn-secondary" title="Download Invoice">
+                            <i class="fas fa-file-invoice"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% if not orders %}
 <div class="card text-center" style="padding: 3rem;">
@@ -121,52 +132,30 @@
 
 <style>
     .status-badge {
-        padding: 5px 10px;
+        padding: 4px 8px;
         border-radius: 20px;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         display: inline-block;
+        white-space: nowrap;
     }
-    .status-pending-payment { 
-        background: #cce5ff; 
-        color: #004085; 
-    }
-    .status-pending { 
-        background: #fff3cd; 
-        color: #856404; 
-    }
-    .status-approved { 
-        background: #d4edda; 
-        color: #155724; 
-    }
-    .status-completed { 
-        background: #d1e7dd; 
-        color: #0f5132; 
-    }
-    .status-rejected { 
-        background: #f8d7da; 
-        color: #721c24; 
-    }
-    .status-cancelled { 
-        background: #e2e3e5; 
-        color: #383d41; 
-    }
+    .status-pending-payment { background: #cce5ff; color: #004085; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-approved { background: #d4edda; color: #155724; }
+    .status-completed { background: #d1e7dd; color: #0f5132; }
+    .status-rejected { background: #f8d7da; color: #721c24; }
+    .status-cancelled { background: #e2e3e5; color: #383d41; }
     
     .btn {
-        padding: 5px 10px;
+        padding: 4px 6px;
         border: none;
         border-radius: 3px;
         cursor: pointer;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 3px;
-        font-size: 12px;
-        transition: all 0.3s ease;
-    }
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        gap: 2px;
+        font-size: 11px;
     }
     .btn-info { background: #17a2b8; color: white; }
     .btn-success { background: #28a745; color: white; }
@@ -178,22 +167,38 @@
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
+        font-size: 13px;
     }
     
     th {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 12px;
+        padding: 10px 6px;
         text-align: left;
+        white-space: nowrap;
+        font-size: 12px;
     }
     
     td {
-        padding: 12px;
+        padding: 8px 6px;
         border-bottom: 1px solid #ddd;
     }
     
     tr:hover {
         background: #f5f5f5;
+    }
+    
+    @media (max-width: 768px) {
+        table {
+            font-size: 11px;
+        }
+        td, th {
+            padding: 6px 4px;
+        }
+        .btn {
+            padding: 3px 4px;
+            font-size: 9px;
+        }
     }
 </style>
 

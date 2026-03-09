@@ -174,6 +174,19 @@ def order_details(oid):
     conn = get_db_connection()
     cur = conn.cursor()
 
+    # Get order details with timestamps
+    cur.execute("""
+        SELECT o.oid, o.total_price, o.status, o.payment_method, 
+               o.payment_status, o.table_number,
+               TO_CHAR(o.created_at, 'DD/MM/YYYY HH12:MI AM') as order_date,
+               TO_CHAR(o.updated_at, 'DD/MM/YYYY HH12:MI AM') as last_updated
+        FROM orders o
+        WHERE o.oid=%s
+    """, (oid,))
+    
+    order = cur.fetchone()
+
+    # Get order items
     cur.execute("""
         SELECT m.mname, oi.qty, oi.price
         FROM order_items oi
@@ -182,10 +195,16 @@ def order_details(oid):
     """, (oid,))
 
     items = cur.fetchall()
+    
+    # Calculate total
+    total = 0
+    for item in items:
+        total += item[1] * item[2]
+    
     cur.close()
     conn.close()
 
-    return render_template("order_details.html", items=items)
+    return render_template("order_details.html", items=items, total=total, order=order)
 
 @app.route('/admin/dashboard')
 def admin_dashboard():
@@ -975,7 +994,9 @@ def my_orders():
 
     cur.execute("""
         SELECT oid, total_price, status, payment_method, payment_status, 
-               COALESCE(payment_error, '') as payment_error
+               COALESCE(payment_error, '') as payment_error,
+               TO_CHAR(created_at, 'DD/MM/YYYY HH12:MI AM') as order_date,
+               TO_CHAR(updated_at, 'DD/MM/YYYY HH12:MI AM') as last_updated
         FROM orders
         WHERE user_id=%s
         ORDER BY oid DESC
@@ -997,12 +1018,14 @@ def admin_orders():
     cur = conn.cursor()
 
     cur.execute("""
-    SELECT o.oid, u.username, o.total_price, o.status, 
-           o.payment_method, o.payment_status, o.payment_id, o.table_number
-    FROM orders o
-    JOIN users u ON u.id = o.user_id
-    ORDER BY o.oid DESC
-""")
+        SELECT o.oid, u.username, o.total_price, o.status, 
+               o.payment_method, o.payment_status, o.payment_id, o.table_number,
+               TO_CHAR(o.created_at, 'DD/MM/YYYY HH12:MI AM') as order_date,
+               TO_CHAR(o.updated_at, 'DD/MM/YYYY HH12:MI AM') as last_updated
+        FROM orders o
+        JOIN users u ON u.id = o.user_id
+        ORDER BY o.oid DESC
+    """)
 
     orders = cur.fetchall()
     cur.close()
@@ -1054,7 +1077,7 @@ def place_order():
 
             order_status = "Pending Payment" if payment_method == "Online" else "Pending"
             
-            # Include table_number in order
+            # Include created_at (automatically set by DEFAULT CURRENT_TIMESTAMP)
             cur.execute(
                 """
                 INSERT INTO orders (user_id, total_price, status, payment_method, payment_status, table_number)

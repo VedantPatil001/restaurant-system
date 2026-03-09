@@ -3,6 +3,29 @@
 
 <h2><i class="fas fa-receipt"></i> Order Details</h2>
 
+{% if order %}
+<div class="card" style="margin-bottom: 20px; padding: 20px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <div>
+            <h4 style="color: #666; margin-bottom: 5px;">Order ID</h4>
+            <p style="font-size: 18px; font-weight: bold;">#{{ order[0] }}</p>
+        </div>
+        <div>
+            <h4 style="color: #666; margin-bottom: 5px;">Order Date</h4>
+            <p><i class="fas fa-calendar-alt" style="color: #667eea;"></i> {{ order[6] }}</p>
+        </div>
+        <div>
+            <h4 style="color: #666; margin-bottom: 5px;">Last Updated</h4>
+            <p><i class="fas fa-clock" style="color: #667eea;"></i> {{ order[7] }}</p>
+        </div>
+        <div>
+            <h4 style="color: #666; margin-bottom: 5px;">Table Number</h4>
+            <p>{% if order[5] %}<span style="font-weight: bold; color: #28a745;">Table {{ order[5] }}</span>{% else %}Not assigned{% endif %}</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="card">
     <table>
         <thead>

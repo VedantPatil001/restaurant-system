@@ -4,100 +4,114 @@
 <h2><i class="fas fa-clipboard-list"></i> My Orders</h2>
 
 {% if orders %}
-<table>
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Total Price</th>
-            <th>Payment Method</th>
-            <th>Payment Status</th>
-            <th>Order Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for order in orders %}
-        <tr>
-            <td>#{{ order[0] }}</td>
-            <td>₹{{ order[1] }}</td>
-            <td>
-                {% if order[3] == 'Cash' %}
-                    <span style="color: #28a745;">
-                        <i class="fas fa-money-bill-wave"></i> Cash
+<div style="overflow-x: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date & Time</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Last Updated</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order[0] }}</td>
+                <td>
+                    <span style="font-size: 13px;">
+                        <i class="fas fa-calendar-alt" style="color: #667eea;"></i> {{ order[6] }}
                     </span>
-                {% else %}
-                    <span style="color: #007bff;">
-                        <i class="fas fa-credit-card"></i> Online
+                </td>
+                <td><strong>₹{{ order[1] }}</strong></td>
+                <td>
+                    {% if order[3] == 'Cash' %}
+                        <span style="color: #28a745;">
+                            <i class="fas fa-money-bill-wave"></i> Cash
+                        </span>
+                    {% else %}
+                        <span style="color: #007bff;">
+                            <i class="fas fa-credit-card"></i> Online
+                        </span>
+                    {% endif %}
+                    <br>
+                    <small>
+                        {% if order[4] == 'Completed' %}
+                            <span class="status-badge status-completed">Paid</span>
+                        {% elif order[4] == 'Failed' %}
+                            <span class="status-badge status-rejected">Failed</span>
+                        {% else %}
+                            <span class="status-badge status-pending">Pending</span>
+                        {% endif %}
+                    </small>
+                </td>
+                <td>
+                    {% if order[2] == 'Pending Payment' %}
+                        <span class="status-badge status-pending-payment">Awaiting Payment</span>
+                    {% elif order[2] == 'Pending' %}
+                        <span class="status-badge status-pending">Pending Approval</span>
+                    {% elif order[2] == 'Approved' %}
+                        <span class="status-badge status-approved">Approved</span>
+                    {% elif order[2] == 'Completed' %}
+                        <span class="status-badge status-completed">Completed</span>
+                    {% elif order[2] == 'Rejected' %}
+                        <span class="status-badge status-rejected">Rejected</span>
+                    {% elif order[2] == 'Cancelled' %}
+                        <span class="status-badge status-cancelled">Cancelled</span>
+                    {% elif order[2] == 'Payment Failed' %}
+                        <span class="status-badge status-rejected">Payment Failed</span>
+                        {% if order[5] %}
+                            <small style="display: block; color: #dc3545; font-size: 11px;">
+                                {{ order[5] }}
+                            </small>
+                        {% endif %}
+                    {% else %}
+                        {{ order[2] }}
+                    {% endif %}
+                </td>
+                <td>
+                    <span style="font-size: 12px; color: #666;">
+                        <i class="fas fa-clock"></i> {{ order[7] }}
                     </span>
-                {% endif %}
-            </td>
-            <td>
-                {% if order[4] == 'Completed' %}
-                    <span class="status-badge status-completed">Paid</span>
-                {% elif order[4] == 'Failed' %}
-                    <span class="status-badge status-rejected">Failed</span>
-                {% else %}
-                    <span class="status-badge status-pending">Pending</span>
-                {% endif %}
-            </td>
-            <td>
-                {% if order[2] == 'Pending Payment' %}
-                    <span class="status-badge status-pending-payment">Awaiting Payment</span>
-                {% elif order[2] == 'Pending' %}
-                    <span class="status-badge status-pending">Pending Approval</span>
-                {% elif order[2] == 'Approved' %}
-                    <span class="status-badge status-approved">Approved</span>
-                {% elif order[2] == 'Completed' %}
-                    <span class="status-badge status-completed">Completed</span>
-                {% elif order[2] == 'Rejected' %}
-                    <span class="status-badge status-rejected">Rejected</span>
-                {% elif order[2] == 'Cancelled' %}
-                    <span class="status-badge status-cancelled">Cancelled</span>
-                {% elif order[2] == 'Payment Failed' %}
-                    <span class="status-badge status-rejected">Payment Failed</span>
-                    {% if order[5] %}
-                        <small style="display: block; color: #dc3545; font-size: 11px; margin-top: 3px;">
-                            Reason: {{ order[5] }}
-                        </small>
-                    {% endif %}
-                {% else %}
-                    {{ order[2] }}
-                {% endif %}
-            </td>
-            <td>
-                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                    <a href="/order_details/{{ order[0] }}" class="btn btn-info" title="View Details">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    
-                    <a href="/invoice/{{ order[0] }}" class="btn btn-secondary" title="Download Invoice">
-                        <i class="fas fa-file-invoice"></i>
-                    </a>
-                    
-                    {% if order[2] == 'Pending Payment' and order[3] == 'Online' %}
-                        <a href="/retry_payment/{{ order[0] }}" class="btn btn-success" title="Pay Now">
-                            <i class="fas fa-credit-card"></i> Pay Now
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                        <a href="/order_details/{{ order[0] }}" class="btn btn-info" title="View Details">
+                            <i class="fas fa-eye"></i>
                         </a>
-                    {% endif %}
-                    
-                    {% if order[2] == 'Pending' %}
-                        <a href="/cancel_order/{{ order[0] }}" class="btn btn-danger" 
-                           onclick="return confirm('Cancel this order?')" title="Cancel Order">
-                            <i class="fas fa-ban"></i> Cancel
+                        
+                        <a href="/invoice/{{ order[0] }}" class="btn btn-secondary" title="Download Invoice">
+                            <i class="fas fa-file-invoice"></i>
                         </a>
-                    {% endif %}
-                    
-                    {% if order[2] == 'Payment Failed' and order[3] == 'Online' %}
-                        <a href="/retry_payment/{{ order[0] }}" class="btn btn-warning" title="Retry Payment">
-                            <i class="fas fa-redo"></i> Retry
-                        </a>
-                    {% endif %}
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                        
+                        {% if order[2] == 'Pending Payment' and order[3] == 'Online' %}
+                            <a href="/retry_payment/{{ order[0] }}" class="btn btn-success" title="Pay Now">
+                                <i class="fas fa-credit-card"></i> Pay
+                            </a>
+                        {% endif %}
+                        
+                        {% if order[2] == 'Pending' %}
+                            <a href="/cancel_order/{{ order[0] }}" class="btn btn-danger" 
+                               onclick="return confirm('Cancel this order?')" title="Cancel Order">
+                                <i class="fas fa-ban"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% if order[2] == 'Payment Failed' and order[3] == 'Online' %}
+                            <a href="/retry_payment/{{ order[0] }}" class="btn btn-warning" title="Retry Payment">
+                                <i class="fas fa-redo"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% else %}
 <div class="card text-center" style="padding: 3rem;">
     <i class="fas fa-box-open" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
@@ -112,9 +126,10 @@
     .status-badge {
         padding: 5px 10px;
         border-radius: 20px;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         display: inline-block;
+        white-space: nowrap;
     }
     .status-pending-payment { background: #cce5ff; color: #004085; }
     .status-pending { background: #fff3cd; color: #856404; }
@@ -124,7 +139,7 @@
     .status-cancelled { background: #e2e3e5; color: #383d41; }
     
     .btn {
-        padding: 5px 10px;
+        padding: 5px 8px;
         border: none;
         border-radius: 3px;
         cursor: pointer;
@@ -132,7 +147,7 @@
         display: inline-flex;
         align-items: center;
         gap: 3px;
-        font-size: 12px;
+        font-size: 11px;
     }
     .btn-info { background: #17a2b8; color: white; }
     .btn-secondary { background: #6c757d; color: white; }
@@ -144,22 +159,37 @@
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
+        font-size: 13px;
     }
     
     th {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 12px;
+        padding: 12px 8px;
         text-align: left;
+        white-space: nowrap;
     }
     
     td {
-        padding: 12px;
+        padding: 10px 8px;
         border-bottom: 1px solid #ddd;
     }
     
     tr:hover {
         background: #f5f5f5;
+    }
+    
+    @media (max-width: 768px) {
+        table {
+            font-size: 12px;
+        }
+        td, th {
+            padding: 8px 5px;
+        }
+        .btn {
+            padding: 4px 6px;
+            font-size: 10px;
+        }
     }
 </style>
 
